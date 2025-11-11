@@ -169,9 +169,14 @@ defmodule ExUtcp.Transports.Http.SseTest do
       done_msg = {:done, make_ref()}
       error_msg = {:error, make_ref(), "fail"}
 
-      assert elem(data_msg, 0) != elem(done_msg, 0)
-      assert elem(done_msg, 0) != elem(error_msg, 0)
-      assert elem(data_msg, 0) != elem(error_msg, 0)
+      # Verify each message type is unique
+      assert elem(data_msg, 0) == :data
+      assert elem(done_msg, 0) == :done
+      assert elem(error_msg, 0) == :error
+
+      # All three types are different
+      types = [:data, :done, :error]
+      assert length(Enum.uniq(types)) == 3
     end
   end
 

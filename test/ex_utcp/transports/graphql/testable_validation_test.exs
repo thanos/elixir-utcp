@@ -6,8 +6,8 @@ defmodule ExUtcp.Transports.Graphql.TestableValidationTest do
 
   use ExUnit.Case, async: true
 
-  alias ExUtcp.Transports.Graphql.Testable
   alias ExUtcp.Transports.Graphql.MockConnection
+  alias ExUtcp.Transports.Graphql.Testable
 
   describe "Connection Module Validation" do
     test "accepts valid connection module" do
@@ -276,16 +276,12 @@ defmodule ExUtcp.Transports.Graphql.TestableValidationTest do
       # After fix: get_connection can return {:error, ...} when connection_module is nil
 
       # Simulate the fixed behavior
-      connection_module = nil
+      _connection_module = nil
 
-      result =
-        case connection_module do
-          nil -> {:error, "No connection module configured"}
-          MockConnection -> {:ok, :mock_connection}
-          _module -> {:ok, :mock_connection}
-        end
+      # When connection_module is nil, get_connection returns error
+      result = {:error, "No connection module configured"}
 
-      # This error path is now reachable
+      # This error path is now reachable with the fix
       assert result == {:error, "No connection module configured"}
     end
 

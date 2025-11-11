@@ -30,7 +30,7 @@ defmodule ExUtcp.Transports.WebRTC.ValidationTest do
       case result do
         {:ok, tools} ->
           assert is_list(tools)
-          assert length(tools) == 2
+          assert Enum.count(tools) == 2
 
         {:error, _reason} ->
           # May fail if signaling not available, but should not crash
@@ -57,7 +57,7 @@ defmodule ExUtcp.Transports.WebRTC.ValidationTest do
       case result do
         {:ok, tools} ->
           assert is_list(tools)
-          assert length(tools) == 0
+          assert Enum.empty?(tools)
 
         {:error, _reason} ->
           assert true
@@ -85,7 +85,7 @@ defmodule ExUtcp.Transports.WebRTC.ValidationTest do
       case result do
         {:ok, tools} ->
           assert is_list(tools)
-          assert length(tools) == 0
+          assert Enum.empty?(tools)
 
         {:error, _reason} ->
           assert true
@@ -200,7 +200,7 @@ defmodule ExUtcp.Transports.WebRTC.ValidationTest do
       empty_tools = []
 
       assert Enum.all?(empty_tools, &is_map/1)
-      assert length(empty_tools) == 0
+      assert Enum.empty?(empty_tools)
     end
   end
 
@@ -314,14 +314,14 @@ defmodule ExUtcp.Transports.WebRTC.ValidationTest do
       ]
 
       assert Enum.all?(complex_tools, &is_map/1)
-      assert length(complex_tools) == 1
+      assert Enum.count(complex_tools) == 1
     end
 
     test "handles empty map as tool" do
       tools = [%{}]
 
       assert Enum.all?(tools, &is_map/1)
-      assert length(tools) == 1
+      assert Enum.count(tools) == 1
     end
   end
 end

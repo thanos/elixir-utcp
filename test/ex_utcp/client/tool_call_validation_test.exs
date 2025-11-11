@@ -138,7 +138,8 @@ defmodule ExUtcp.Client.ToolCallValidationTest do
       result =
         with {:ok, _} <- {:error, "First error"},
              # This should never execute
-             _ <- (_steps = [:should_not_reach | steps]; {:ok, :value}),
+             _ <- (_steps = [:should_not_reach | steps]),
+             _ <- {:ok, :value},
              {:ok, _} <- {:ok, :value} do
           {:ok, "success"}
         end
@@ -175,11 +176,8 @@ defmodule ExUtcp.Client.ToolCallValidationTest do
     test "get_tool_or_error returns ok for valid tool" do
       tool = %{name: "test_tool"}
 
-      result =
-        case tool do
-          nil -> {:error, "Tool not found"}
-          tool -> {:ok, tool}
-        end
+      # Simulate the helper function behavior
+      result = {:ok, tool}
 
       assert result == {:ok, %{name: "test_tool"}}
     end
