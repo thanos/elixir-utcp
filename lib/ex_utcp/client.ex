@@ -13,6 +13,7 @@ defmodule ExUtcp.Client do
   alias ExUtcp.OpenApiConverter
   alias ExUtcp.Providers
   alias ExUtcp.Repository
+  alias ExUtcp.Search.Engine, as: SearchEngine
   alias ExUtcp.Tools
   alias ExUtcp.Types, as: T
 
@@ -770,14 +771,14 @@ defmodule ExUtcp.Client do
 
   defp create_search_engine_from_state(state) do
     # Create a search engine and populate it with current tools and providers
-    search_engine = ExUtcp.Search.Engine.new()
+    search_engine = SearchEngine.new()
 
     # Add all tools from repository
     tools = Repository.get_tools(state.repository)
 
     search_engine =
       Enum.reduce(tools, search_engine, fn tool, acc ->
-        ExUtcp.Search.Engine.add_tool(acc, tool)
+        SearchEngine.add_tool(acc, tool)
       end)
 
     # Add all providers from repository
@@ -785,7 +786,7 @@ defmodule ExUtcp.Client do
 
     search_engine =
       Enum.reduce(providers, search_engine, fn provider, acc ->
-        ExUtcp.Search.Engine.add_provider(acc, provider)
+        SearchEngine.add_provider(acc, provider)
       end)
 
     search_engine
