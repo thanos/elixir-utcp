@@ -19,7 +19,11 @@ defmodule ExUtcp.Transports.Http do
   @doc """
   Creates a new HTTP transport.
   """
-  @spec new(keyword()) :: %__MODULE__{}
+  @spec new(keyword()) :: %__MODULE__{
+          http_client: term(),
+          logger: function(),
+          oauth_tokens: map()
+        }
   def new(opts \\ []) do
     %__MODULE__{
       http_client: Keyword.get(opts, :http_client, Req.new()),

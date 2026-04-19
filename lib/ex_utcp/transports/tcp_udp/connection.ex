@@ -283,9 +283,6 @@ defmodule ExUtcp.Transports.TcpUdp.Connection do
 
           {:error, :timeout} ->
             {[%{type: :end}], {state, 0}}
-
-          {:error, reason} ->
-            {[%{type: :error, error: reason}], {state, 0}}
         end
       end,
       fn _state -> :ok end

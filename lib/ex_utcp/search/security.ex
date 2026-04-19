@@ -63,7 +63,7 @@ defmodule ExUtcp.Search.Security do
   @doc """
   Scans providers for sensitive data.
   """
-  @spec scan_providers([Types.provider_config()]) :: %{String.t() => [map()]}
+  @spec scan_providers([map()]) :: %{String.t() => [map()]}
   def scan_providers(providers) do
     providers
     |> Enum.reduce(%{}, fn provider, acc ->
@@ -80,7 +80,7 @@ defmodule ExUtcp.Search.Security do
   @doc """
   Scans a single provider for sensitive data.
   """
-  @spec scan_provider(Types.provider_config()) :: [map()]
+  @spec scan_provider(map()) :: [map()]
   def scan_provider(provider) do
     warnings = []
 
@@ -155,22 +155,9 @@ defmodule ExUtcp.Search.Security do
   # Private functions
 
   defp scan_text(text, field_name) do
-    # Use TruffleHog to find sensitive data matches
-    matches = TruffleHog.find_matches(text, :all, %{})
-
-    Enum.map(matches, fn match ->
-      %{
-        field: field_name,
-        type: match.type || "unknown",
-        value: String.slice(match.value || "", 0, 10) <> "...",
-        confidence: match.confidence || 0.8,
-        line: match.line || 1
-      }
-    end)
-  rescue
-    _ ->
-      # Fallback to basic pattern matching if TruffleHog fails
-      scan_text_basic(text, field_name)
+    # TruffleHog is a search index library, not a pattern scanner.
+    # Fallback to basic pattern matching for security scanning.
+    scan_text_basic(text, field_name)
   end
 
   defp scan_text_basic(text, field_name) do

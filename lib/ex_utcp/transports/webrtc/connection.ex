@@ -63,7 +63,7 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   Calls a tool stream over the WebRTC data channel.
   """
   @spec call_tool_stream(pid(), String.t(), map(), integer()) ::
-          {:ok, Stream.t()} | {:error, term()}
+          {:ok, Enumerable.t()} | {:error, term()}
   def call_tool_stream(pid, tool_name, args, timeout \\ 30_000) do
     GenServer.call(pid, {:call_tool_stream, tool_name, args}, timeout)
   end
@@ -186,10 +186,10 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
 
       # Create data channel
       {:ok, dc} =
-        PeerConnection.create_data_channel(pc, "utcp_channel", %{
+        PeerConnection.create_data_channel(pc, "utcp_channel",
           ordered: true,
           max_retransmits: 3
-        })
+        )
 
       # Connect to signaling server
       {:ok, signaling_pid} = Signaling.start_link(state.signaling_server, self())

@@ -25,7 +25,16 @@ defmodule ExUtcp.Transports.WebSocket.Testable do
   @doc """
   Creates a new testable WebSocket transport.
   """
-  @spec new(keyword()) :: %__MODULE__{}
+  @spec new(keyword()) :: %__MODULE__{
+          connection_module: module(),
+          connection_pool: map(),
+          connection_timeout: non_neg_integer(),
+          genserver_module: module(),
+          logger: function(),
+          max_retries: non_neg_integer(),
+          retry_config: map(),
+          retry_delay: non_neg_integer()
+        }
   def new(opts \\ []) do
     %__MODULE__{
       logger: Keyword.get(opts, :logger, &Logger.info/1),

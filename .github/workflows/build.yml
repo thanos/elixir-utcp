@@ -1,0 +1,75 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: "1.17"
+            otp: "27"
+            label: two-back
+          - elixir: "1.18"
+            otp: "27"
+            label: one-back
+          - elixir: "1.19"
+            otp: "28"
+            label: latest
+          - elixir: "1.20.0-rc.4"
+            otp: "28"
+            label: forward
+            experimental: true
+
+    continue-on-error: ${{ matrix.experimental == true }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Elixir & Erlang/OTP
+        id: beam
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - name: Restore deps cache
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: deps-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            deps-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: _build
+          key: build-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            build-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile
+
+      - name: Run tests with coverage (latest only)
+        if: matrix.label == 'latest'
+        run: mix test --cover
+
+      - name: Run tests (compatibility)
+        if: matrix.label != 'latest'
+        run: mix test

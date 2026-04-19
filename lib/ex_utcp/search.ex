@@ -53,8 +53,13 @@ defmodule ExUtcp.Search do
   @doc """
   Searches for tools using the specified query and options.
   """
-  @spec search_tools(Engine.t(), String.t(), search_options()) :: [search_result()]
-  def search_tools(engine, query, opts \\ %{}) do
+  @spec search_tools(Engine.t(), String.t()) :: [search_result()]
+  def search_tools(engine, query) do
+    search_tools(engine, query, %{})
+  end
+
+  @spec search_tools(Engine.t(), String.t(), map()) :: [search_result()]
+  def search_tools(engine, query, opts) when is_map(opts) do
     opts = merge_default_options(opts)
 
     tools = Engine.get_all_tools(engine)
@@ -95,8 +100,13 @@ defmodule ExUtcp.Search do
   @doc """
   Searches for providers using the specified query and options.
   """
-  @spec search_providers(Engine.t(), String.t(), search_options()) :: [map()]
-  def search_providers(engine, query, opts \\ %{}) do
+  @spec search_providers(Engine.t(), String.t()) :: [map()]
+  def search_providers(engine, query) do
+    search_providers(engine, query, %{})
+  end
+
+  @spec search_providers(Engine.t(), String.t(), map()) :: [map()]
+  def search_providers(engine, query, opts) when is_map(opts) do
     opts = merge_default_options(opts)
 
     providers = Engine.get_all_providers(engine)
@@ -316,7 +326,7 @@ defmodule ExUtcp.Search do
     end)
   end
 
-  defp get_matched_fields(tool, query, match_type) do
+  defp get_matched_fields(tool, query, _match_type) do
     query_lower = String.downcase(query)
     fields = []
 
@@ -334,10 +344,7 @@ defmodule ExUtcp.Search do
         fields
       end
 
-    case match_type do
-      :exact -> fields
-      _ -> fields
-    end
+    fields
   end
 
   defp extract_keywords(text) do

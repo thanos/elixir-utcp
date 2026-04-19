@@ -21,7 +21,7 @@ defmodule ExUtcp.Search.Filters do
   @doc """
   Applies filters to a list of providers.
   """
-  @spec apply_provider_filters([Types.provider_config()], map()) :: [Types.provider_config()]
+  @spec apply_provider_filters([map()], map()) :: [map()]
   def apply_provider_filters(providers, filters) do
     providers
     |> filter_providers_by_names(Map.get(filters, :providers, []))
@@ -78,8 +78,8 @@ defmodule ExUtcp.Search.Filters do
   @doc """
   Filters providers by names.
   """
-  @spec filter_providers_by_names([Types.provider_config()], [String.t()]) :: [
-          Types.provider_config()
+  @spec filter_providers_by_names([map()], [String.t()]) :: [
+          map()
         ]
   def filter_providers_by_names(providers, []), do: providers
 
@@ -94,8 +94,8 @@ defmodule ExUtcp.Search.Filters do
   @doc """
   Filters providers by transport types.
   """
-  @spec filter_providers_by_transports([Types.provider_config()], [atom()]) :: [
-          Types.provider_config()
+  @spec filter_providers_by_transports([map()], [atom()]) :: [
+          map()
         ]
   def filter_providers_by_transports(providers, []), do: providers
 

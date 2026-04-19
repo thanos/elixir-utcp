@@ -3,8 +3,6 @@ defmodule ExUtcp.OpenApiConverter.AuthMapper do
   Maps OpenAPI security schemes to UTCP authentication configurations.
   """
 
-  alias ExUtcp.OpenApiConverter.Types, as: T
-
   @doc """
   Maps OpenAPI security schemes to UTCP authentication.
 
@@ -42,7 +40,7 @@ defmodule ExUtcp.OpenApiConverter.AuthMapper do
 
   UTCP authentication configuration or nil.
   """
-  @spec map_security_scheme(T.ParsedSecurityScheme.t()) :: map() | nil
+  @spec map_security_scheme(ExUtcp.OpenApiConverter.Types.ParsedSecurityScheme.t()) :: map() | nil
   def map_security_scheme(scheme) do
     case scheme.type do
       "apiKey" -> map_api_key_auth(scheme)

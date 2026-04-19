@@ -105,10 +105,7 @@ defmodule ExUtcp.Search.Fuzzy do
 
       true ->
         # Use FuzzyCompare for advanced similarity calculation
-        case FuzzyCompare.similarity(str1_lower, str2_lower) do
-          {:ok, similarity} -> similarity
-          _ -> levenshtein_similarity(str1_lower, str2_lower)
-        end
+        FuzzyCompare.similarity(str1_lower, str2_lower)
     end
   end
 

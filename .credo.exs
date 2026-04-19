@@ -7,8 +7,8 @@
         included: [
           "lib/",
           "src/",
-          "test/",
           "web/",
+          "test/",
           "apps/*/lib/",
           "apps/*/src/",
           "apps/*/test/",

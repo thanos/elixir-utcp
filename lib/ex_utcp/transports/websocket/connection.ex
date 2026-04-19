@@ -27,7 +27,7 @@ defmodule ExUtcp.Transports.WebSocket.Connection do
   Starts a new WebSocket connection.
   """
   @impl ConnectionBehaviour
-  @spec start_link(map()) :: {:ok, pid()} | {:error, term()}
+  @spec start_link(%{url: binary()}) :: {:ok, pid()} | {:error, term()}
   def start_link(provider) do
     start_link(provider.url, provider, [])
   end
@@ -205,7 +205,7 @@ defmodule ExUtcp.Transports.WebSocket.Connection do
   Calls a tool through the WebSocket connection.
   """
   @impl ConnectionBehaviour
-  @spec call_tool(pid(), String.t(), map(), keyword()) :: {:ok, map()} | {:error, term()}
+  @spec call_tool(pid(), String.t(), map(), keyword()) :: {:ok, binary()} | {:error, term()}
   def call_tool(pid, tool_name, args, opts \\ []) do
     message = %{
       type: "tool_call",
@@ -243,9 +243,15 @@ defmodule ExUtcp.Transports.WebSocket.Connection do
         stream =
           Stream.unfold(nil, fn _ ->
             case get_next_message(pid, Keyword.get(opts, :timeout, 5_000)) do
-              {:ok, %{"type" => "stream_end"}} -> nil
-              {:ok, data} -> {data, nil}
-              {:error, _} -> nil
+              {:ok, data} ->
+                case Jason.decode(data) do
+                  {:ok, %{"type" => "stream_end"}} -> nil
+                  {:ok, decoded} -> {decoded, nil}
+                  {:error, _} -> {data, nil}
+                end
+
+              {:error, _} ->
+                nil
             end
           end)
 
@@ -310,11 +316,11 @@ defmodule ExUtcp.Transports.WebSocket.Connection do
   @impl true
   def handle_cast(:update_last_used, state) do
     new_state = %{state | last_ping: System.monotonic_time(:millisecond)}
-    {:noreply, new_state}
+    {:ok, new_state}
   end
 
   def handle_cast(msg, state) do
     Logger.warning("Unhandled WebSocket cast: #{inspect(msg)}")
-    {:noreply, state}
+    {:ok, state}
   end
 end
