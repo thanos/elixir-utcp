@@ -148,8 +148,6 @@ defmodule ExUtcp.Types do
   @type webrtc_provider :: %{
           name: String.t(),
           type: :webrtc,
-          url: String.t() | nil,
-          auth: auth() | nil,
           peer_id: String.t() | nil,
           signaling_server: String.t(),
           ice_servers: [map()],

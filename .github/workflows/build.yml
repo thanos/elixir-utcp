@@ -35,17 +35,17 @@ jobs:
     continue-on-error: ${{ matrix.experimental == true }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Elixir & Erlang/OTP
         id: beam
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@a6e26b22319003294c58386b6f25edbc7336819a # v1.18.0
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Restore deps cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: deps
           key: deps-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
@@ -53,7 +53,7 @@ jobs:
             deps-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-
 
       - name: Restore build cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: _build
           key: build-${{ runner.os }}-otp${{ matrix.otp }}-elixir${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
