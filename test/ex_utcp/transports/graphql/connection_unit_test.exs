@@ -82,7 +82,7 @@ defmodule ExUtcp.Transports.Graphql.ConnectionUnitTest do
 
     test "sets default max_retries when not provided" do
       provider = %{name: "test", url: "http://example.com/graphql"}
-      opts = []
+      # opts = []
 
       # Can't test init directly without HTTP, but struct creation works
       state = %Connection{
@@ -190,7 +190,9 @@ defmodule ExUtcp.Transports.Graphql.ConnectionUnitTest do
 
       from = {self(), :test_ref}
 
-      result = Connection.handle_call({:subscription, "subscription { test }", %{}, []}, from, state)
+      result =
+        Connection.handle_call({:subscription, "subscription { test }", %{}, []}, from, state)
+
       assert match?({:reply, {:error, _}, ^state}, result)
     end
 
@@ -209,7 +211,9 @@ defmodule ExUtcp.Transports.Graphql.ConnectionUnitTest do
 
       from = {self(), :test_ref}
 
-      result = Connection.handle_call({:subscription, "subscription { test }", %{}, []}, from, state)
+      result =
+        Connection.handle_call({:subscription, "subscription { test }", %{}, []}, from, state)
+
       assert match?({:reply, {:error, _}, _}, result)
     end
   end

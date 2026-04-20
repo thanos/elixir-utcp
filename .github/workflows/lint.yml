@@ -52,7 +52,7 @@ jobs:
         run: mix deps.get
 
       - name: Check for outdated dependencies
-        run: mix hex.outdated --all
+        run: mix hex.outdated
 
       - name: Audit dependencies for known vulnerabilities
         run: mix hex.audit

@@ -86,7 +86,7 @@ defmodule ExUtcp.ConfigTest do
     test "returns variable from loader module" do
       # Use the module atom directly - Config calls loader.get(key)
       loader = __MODULE__.TestLoader
-      config = Config.new(load_variables_from: [loader])
+      Config.new(load_variables_from: [loader])
       # This won't work because TestLoader.get/2 needs a struct
       # Skip this test for now - loaders need proper implementation
     end
@@ -100,14 +100,18 @@ defmodule ExUtcp.ConfigTest do
 
     test "returns error when variable not found" do
       config = Config.new(variables: %{})
-      assert {:error, %{variable_name: "NONEXISTENT"}} = Config.get_variable(config, "NONEXISTENT")
+
+      assert {:error, %{variable_name: "NONEXISTENT"}} =
+               Config.get_variable(config, "NONEXISTENT")
     end
   end
 
   describe "substitute_variables/2" do
     test "substitutes ${VAR} pattern" do
       config = Config.new(variables: %{"HOST" => "example.com"})
-      assert Config.substitute_variables(config, "https://${HOST}/api") == "https://example.com/api"
+
+      assert Config.substitute_variables(config, "https://${HOST}/api") ==
+               "https://example.com/api"
     end
 
     test "substitutes $VAR pattern" do
@@ -117,12 +121,16 @@ defmodule ExUtcp.ConfigTest do
 
     test "substitutes multiple variables" do
       config = Config.new(variables: %{"HOST" => "example.com", "PORT" => "8080"})
-      assert Config.substitute_variables(config, "https://${HOST}:${PORT}/api") == "https://example.com:8080/api"
+
+      assert Config.substitute_variables(config, "https://${HOST}:${PORT}/api") ==
+               "https://example.com:8080/api"
     end
 
     test "leaves unsubstituted variables intact" do
       config = Config.new(variables: %{})
-      assert Config.substitute_variables(config, "https://${UNKNOWN}/api") == "https://${UNKNOWN}/api"
+
+      assert Config.substitute_variables(config, "https://${UNKNOWN}/api") ==
+               "https://${UNKNOWN}/api"
     end
 
     test "substitutes in list values" do
@@ -132,7 +140,10 @@ defmodule ExUtcp.ConfigTest do
 
     test "substitutes in map values" do
       config = Config.new(variables: %{"KEY" => "substituted"})
-      assert Config.substitute_variables(config, %{"field" => "${KEY}"}) == %{"field" => "substituted"}
+
+      assert Config.substitute_variables(config, %{"field" => "${KEY}"}) == %{
+               "field" => "substituted"
+             }
     end
 
     test "returns non-string, non-map, non-list values unchanged" do
@@ -144,7 +155,9 @@ defmodule ExUtcp.ConfigTest do
 
     test "handles mixed content in string" do
       config = Config.new(variables: %{"VAR" => "replaced"})
-      assert Config.substitute_variables(config, "prefix_${VAR}_suffix") == "prefix_replaced_suffix"
+
+      assert Config.substitute_variables(config, "prefix_${VAR}_suffix") ==
+               "prefix_replaced_suffix"
     end
 
     test "handles $VAR pattern - matches word chars only" do
@@ -155,7 +168,10 @@ defmodule ExUtcp.ConfigTest do
 
     test "nested map substitution" do
       config = Config.new(variables: %{"HOST" => "example.com"})
-      result = Config.substitute_variables(config, %{"url" => "https://${HOST}", "static" => "value"})
+
+      result =
+        Config.substitute_variables(config, %{"url" => "https://${HOST}", "static" => "value"})
+
       assert result == %{"url" => "https://example.com", "static" => "value"}
     end
   end

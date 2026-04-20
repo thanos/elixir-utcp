@@ -1,7 +1,7 @@
 defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
   use ExUnit.Case, async: false
 
-  alias ExUtcp.Transports.Mcp.{Connection, Pool}
+  alias ExUtcp.Transports.Mcp.Pool
 
   @moduletag :unit
 
@@ -67,7 +67,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
     test "initializes with default values" do
       result = Pool.init([])
 
-      assert match?({:ok, state}, result)
+      assert match?({:ok, _state}, result)
       {:ok, state} = result
       assert state.connections == %{}
       assert state.max_connections == 10
@@ -135,7 +135,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call({:close_connection, conn_pid}, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connections == %{}
     end
@@ -170,7 +170,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call(:close_all_connections, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connections == %{}
     end
@@ -181,7 +181,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call(:close_all_connections, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connections == %{}
     end
@@ -201,7 +201,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call(:stats, from, state)
-      assert match?({:reply, stats, ^state}, result)
+      assert match?({:reply, _stats, ^state}, result)
       {:reply, stats, _} = result
       assert stats.total_connections == 2
       assert stats.max_connections == 10
@@ -243,7 +243,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
         )
 
       result = Pool.handle_info(:cleanup, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert map_size(new_state.connections) == 1
       assert Map.has_key?(new_state.connections, key2)
@@ -270,7 +270,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
         )
 
       result = Pool.handle_info(:cleanup, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert map_size(new_state.connections) == 2
     end
@@ -293,7 +293,7 @@ defmodule ExUtcp.Transports.Mcp.PoolUnitTest do
         )
 
       result = Pool.handle_info({:DOWN, nil, :process, dead_pid, :normal}, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert map_size(new_state.connections) == 1
       assert Map.has_key?(new_state.connections, key2)

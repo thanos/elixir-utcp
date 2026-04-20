@@ -137,6 +137,7 @@ defmodule ExUtcp.MixProject do
   defp verify(_) do
     steps = [
       # ["precommit", :dev],
+      {"hex.outdated", :dev},
       {"compile --warnings-as-errors", :dev},
       {"format --check-formatted", :dev},
       {"credo --strict", :dev},
