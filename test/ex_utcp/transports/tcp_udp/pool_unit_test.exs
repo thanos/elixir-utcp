@@ -1,7 +1,7 @@
 defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
   use ExUnit.Case, async: false
 
-  alias ExUtcp.Transports.TcpUdp.{Connection, Pool}
+  alias ExUtcp.Transports.TcpUdp.Pool
 
   @moduletag :unit
 
@@ -77,7 +77,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       opts = []
       result = Pool.init(opts)
 
-      assert match?({:ok, state}, result)
+      assert match?({:ok, _state}, result)
       {:ok, state} = result
       assert state.connections == %{}
       assert state.max_connections == 10
@@ -88,7 +88,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       opts = [max_connections: 50, connection_timeout: 45_000]
       result = Pool.init(opts)
 
-      assert match?({:ok, state}, result)
+      assert match?({:ok, _state}, result)
       {:ok, state} = result
       assert state.max_connections == 50
       assert state.connection_timeout == 45_000
@@ -107,7 +107,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       provider = %{name: "new_conn", protocol: :tcp}
 
       result = Pool.handle_call({:get_connection, provider}, from, state)
-      assert match?({:reply, {:error, msg}, ^state}, result)
+      assert match?({:reply, {:error, _msg}, ^state}, result)
       {:reply, {:error, msg}, _} = result
       assert msg =~ "Maximum connections reached"
     end
@@ -144,7 +144,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call({:close_connection, conn_pid}, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connections == %{}
     end
@@ -180,7 +180,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call(:close_all_connections, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connections == %{}
     end
@@ -195,7 +195,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call(:close_all_connections, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connections == %{}
     end
@@ -212,7 +212,7 @@ defmodule ExUtcp.Transports.TcpUdp.PoolUnitTest do
       from = {self(), :test_ref}
 
       result = Pool.handle_call(:stats, from, state)
-      assert match?({:reply, stats, ^state}, result)
+      assert match?({:reply, _stats, ^state}, result)
       {:reply, stats, _} = result
       assert stats.total_connections == 3
       assert stats.max_connections == 10

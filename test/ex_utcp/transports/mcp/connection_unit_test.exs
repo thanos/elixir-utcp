@@ -99,7 +99,7 @@ defmodule ExUtcp.Transports.Mcp.ConnectionUnitTest do
       from = {self(), :test_ref}
       result = Connection.handle_call(:close, from, state)
 
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.connection_state == :closed
     end
@@ -149,7 +149,7 @@ defmodule ExUtcp.Transports.Mcp.ConnectionUnitTest do
       from = {self(), :test_ref}
       result = Connection.handle_call(:update_last_used, from, state)
 
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert new_state.last_used_at != old_timestamp
     end

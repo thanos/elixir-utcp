@@ -6,6 +6,24 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
 
   @moduletag :unit
 
+  setup do
+    on_exit(fn ->
+      case Process.whereis(WebSocket) do
+        nil ->
+          :ok
+
+        pid ->
+          try do
+            GenServer.stop(pid)
+          catch
+            :exit, _ -> :ok
+          end
+      end
+    end)
+
+    :ok
+  end
+
   describe "new/1" do
     test "creates transport with defaults" do
       transport = WebSocket.new()
@@ -107,10 +125,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
 
     test "succeeds for websocket provider when GenServer running" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       provider =
         Providers.new_websocket_provider(
@@ -150,27 +165,14 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
 
   describe "GenServer start_link/1" do
     test "starts the WebSocket transport GenServer" do
-      # Stop any existing GenServer first
-      case Process.whereis(WebSocket) do
-        nil -> :ok
-        pid -> GenServer.stop(pid)
-      end
-
-      Process.sleep(100)
-
       assert {:ok, pid} = WebSocket.start_link()
       assert is_pid(pid)
       assert Process.alive?(pid)
-
-      GenServer.stop(pid)
     end
 
     test "returns already_started if GenServer already running" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       result = WebSocket.start_link()
       assert match?({:error, {:already_started, _}}, result)
@@ -180,10 +182,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
   describe "GenServer init/1" do
     test "initializes with default state" do
       # We test this indirectly through start_link
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # GenServer is running, which means init succeeded
       assert Process.whereis(WebSocket) != nil
@@ -193,10 +192,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
   describe "handle_info websocket messages" do
     test "handles :text websocket message" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Send a mock websocket message
       send(WebSocket, {:websocket, self(), {:text, "test message"}})
@@ -208,10 +204,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
 
     test "handles :close websocket message" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Send a close message
       send(WebSocket, {:websocket, self(), :close})
@@ -223,10 +216,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
 
     test "handles :error websocket message" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Send an error message
       send(WebSocket, {:websocket, self(), {:error, "some error"}})
@@ -281,10 +271,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
       }
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # This will use safe_string_to_atom internally
       result = WebSocket.deregister_tool_provider(provider)
@@ -304,10 +291,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
   describe "handle_call :close_all" do
     test "closes all connections" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Call close_all
       result = GenServer.call(WebSocket, :close_all)
@@ -318,10 +302,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
   describe "handle_call :get_connection" do
     test "returns error for invalid provider URL" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       provider =
         Providers.new_websocket_provider(
@@ -347,10 +328,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
       }
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # deregister will trigger build_headers via close_connection
       result = WebSocket.deregister_tool_provider(provider)
@@ -367,10 +345,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
       }
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       result = WebSocket.deregister_tool_provider(provider)
       assert result == :ok
@@ -387,10 +362,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
         )
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # This uses build_connection_key internally
       result = WebSocket.deregister_tool_provider(provider)
@@ -407,10 +379,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
         )
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Close when connection doesn't exist should still return :ok
       result = WebSocket.deregister_tool_provider(provider)
@@ -421,10 +390,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
   describe "remove_connection_from_pool/2" do
     test "handles connection close message" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Send a close message which triggers remove_connection_from_pool
       send(WebSocket, {:websocket, self(), :close})
@@ -638,10 +604,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
       }
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # This will attempt connection with protocol header
       result = WebSocket.deregister_tool_provider(provider)
@@ -659,10 +622,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
       }
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       result = WebSocket.deregister_tool_provider(provider)
       assert result == :ok
@@ -683,10 +643,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
       }
 
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # This will use safe_string_to_atom which should handle unknown headers
       result = WebSocket.deregister_tool_provider(provider)
@@ -697,10 +654,7 @@ defmodule ExUtcp.Transports.WebSocketUnitTest do
   describe "close_all_connections/1" do
     test "clears connection pool" do
       # Ensure GenServer is running
-      case Process.whereis(WebSocket) do
-        nil -> {:ok, _pid} = WebSocket.start_link()
-        _ -> :ok
-      end
+      {:ok, _pid} = WebSocket.start_link()
 
       # Close all clears the pool
       result = GenServer.call(WebSocket, :close_all)

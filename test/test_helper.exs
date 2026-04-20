@@ -2,26 +2,28 @@
 # To run integration tests: mix test --include integration
 ExUnit.start(exclude: [:integration])
 
-# Configure Mox
-Mox.defmock(ExUtcp.Transports.Graphql.ConnectionMock,
-  for: ExUtcp.Transports.Graphql.ConnectionBehaviour
-)
+# Configure Mox - use Code.ensure_compiled to avoid redefinition warnings
+# when test_helper.exs is loaded multiple times
+defmodule MoxSetup do
+  def define_mocks do
+    mocks = [
+      {ExUtcp.Transports.Graphql.ConnectionMock, ExUtcp.Transports.Graphql.ConnectionBehaviour},
+      {ExUtcp.Transports.Graphql.PoolMock, ExUtcp.Transports.Graphql.PoolBehaviour},
+      {ExUtcp.Transports.Grpc.ConnectionMock, ExUtcp.Transports.Grpc.ConnectionBehaviour},
+      {ExUtcp.Transports.Grpc.PoolMock, ExUtcp.Transports.Grpc.PoolBehaviour},
+      {ExUtcp.Transports.WebSocket.ConnectionMock, ExUtcp.Transports.WebSocket.ConnectionBehaviour},
+      {ExUtcp.Transports.Mcp.ConnectionMock, ExUtcp.Transports.Mcp.ConnectionBehaviour},
+      {ExUtcp.Transports.Mcp.PoolMock, ExUtcp.Transports.Mcp.PoolBehaviour},
+      {ExUtcp.Transports.WebRTC.ConnectionMock, ExUtcp.Transports.WebRTC.ConnectionBehaviour}
+    ]
 
-Mox.defmock(ExUtcp.Transports.Graphql.PoolMock, for: ExUtcp.Transports.Graphql.PoolBehaviour)
+    for {mock, behaviour} <- mocks do
+      case Code.ensure_compiled(mock) do
+        {:module, _} -> :ok
+        {:error, _} -> Mox.defmock(mock, for: behaviour)
+      end
+    end
+  end
+end
 
-Mox.defmock(ExUtcp.Transports.Grpc.ConnectionMock,
-  for: ExUtcp.Transports.Grpc.ConnectionBehaviour
-)
-
-Mox.defmock(ExUtcp.Transports.Grpc.PoolMock, for: ExUtcp.Transports.Grpc.PoolBehaviour)
-
-Mox.defmock(ExUtcp.Transports.WebSocket.ConnectionMock,
-  for: ExUtcp.Transports.WebSocket.ConnectionBehaviour
-)
-
-Mox.defmock(ExUtcp.Transports.Mcp.ConnectionMock, for: ExUtcp.Transports.Mcp.ConnectionBehaviour)
-Mox.defmock(ExUtcp.Transports.Mcp.PoolMock, for: ExUtcp.Transports.Mcp.PoolBehaviour)
-
-Mox.defmock(ExUtcp.Transports.WebRTC.ConnectionMock,
-  for: ExUtcp.Transports.WebRTC.ConnectionBehaviour
-)
+MoxSetup.define_mocks()

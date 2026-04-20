@@ -182,7 +182,7 @@ defmodule ExUtcp.Transports.TcpUdp.ConnectionUnitTest do
       Process.sleep(5)
 
       result = Connection.handle_cast(:update_last_used, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       # New timestamp should be different (not equal to old)
       assert new_state.last_used != old_timestamp
@@ -202,7 +202,7 @@ defmodule ExUtcp.Transports.TcpUdp.ConnectionUnitTest do
       }
 
       result = Connection.handle_info({:tcp, :socket, "_data"}, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.buffer == "existing_data"
     end
@@ -238,7 +238,7 @@ defmodule ExUtcp.Transports.TcpUdp.ConnectionUnitTest do
       }
 
       result = Connection.handle_info({:udp, :socket, {127, 0, 0, 1}, 1234, "udp_data"}, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.buffer == "udp_data"
     end

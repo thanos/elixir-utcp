@@ -115,7 +115,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
 
       result = Connection.handle_call({:call_tool, tool_name, args}, from, state)
 
-      assert match?({:reply, {:error, msg}, ^state}, result)
+      assert match?({:reply, {:error, _msg}, ^state}, result)
       {:reply, {:error, msg}, _} = result
       assert msg =~ "Connection not ready"
     end
@@ -140,7 +140,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
 
       result = Connection.handle_call({:call_tool, tool_name, args}, from, state)
 
-      assert match?({:reply, {:error, msg}, ^state}, result)
+      assert match?({:reply, {:error, _msg}, ^state}, result)
       {:reply, {:error, msg}, _} = result
       assert msg =~ "Connection not ready"
     end
@@ -167,7 +167,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
 
       result = Connection.handle_call({:call_tool_stream, tool_name, args}, from, state)
 
-      assert match?({:reply, {:error, msg}, ^state}, result)
+      assert match?({:reply, {:error, _msg}, ^state}, result)
       {:reply, {:error, msg}, _} = result
       assert msg =~ "Connection not ready"
     end
@@ -192,7 +192,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
 
       result = Connection.handle_call({:call_tool_stream, tool_name, args}, from, state)
 
-      assert match?({:reply, {:error, msg}, ^state}, result)
+      assert match?({:reply, {:error, _msg}, ^state}, result)
     end
   end
 
@@ -353,8 +353,10 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
         call_id_counter: 0
       }
 
-      result = Connection.handle_info({:ex_webrtc, nil, {:connection_state_change, :connected}}, state)
-      assert match?({:noreply, new_state}, result)
+      result =
+        Connection.handle_info({:ex_webrtc, nil, {:connection_state_change, :connected}}, state)
+
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.connection_state == :connected
     end
@@ -373,8 +375,13 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
         call_id_counter: 0
       }
 
-      result = Connection.handle_info({:ex_webrtc, nil, {:ice_connection_state_change, :connected}}, state)
-      assert match?({:noreply, new_state}, result)
+      result =
+        Connection.handle_info(
+          {:ex_webrtc, nil, {:ice_connection_state_change, :connected}},
+          state
+        )
+
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.ice_connection_state == :connected
     end
@@ -394,7 +401,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
       }
 
       result = Connection.handle_info({:ex_webrtc, nil, :open}, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.connection_state == :connected
     end
@@ -414,7 +421,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
       }
 
       result = Connection.handle_info({:ex_webrtc, nil, :closed}, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.connection_state == :closed
     end
@@ -520,7 +527,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
       message = %{"id" => "call_0", "type" => "response", "result" => "test_result"}
       result = Connection.handle_info({:ex_webrtc, nil, {:data, Jason.encode!(message)}}, state)
 
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.pending_calls == %{}
     end
@@ -566,7 +573,7 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
       message = %{"id" => "call_0", "type" => "error", "error" => "Something went wrong"}
       result = Connection.handle_info({:ex_webrtc, nil, {:data, Jason.encode!(message)}}, state)
 
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.pending_calls == %{}
     end
@@ -616,10 +623,10 @@ defmodule ExUtcp.Transports.WebRTC.ConnectionTest do
 
   describe "create_polling_stream helper" do
     test "is defined and creates a stream" do
-      peer_connection = self()
-      data_channel = self()
-      tool_name = "test_tool"
-      args = %{"input" => "value"}
+      _peer_connection = self()
+      _data_channel = self()
+      # _tool_name = "test_tool"
+      # _args = %{"input" => "value"}
 
       # The function is private, but we test that it would create a stream
       # by verifying the function structure
