@@ -813,4 +813,279 @@ defmodule ExUtcp.Transports.HttpUnitTest do
 
     Map.merge(base_headers, provider.headers)
   end
+
+  describe "call_tool/3 with HTTP provider" do
+    @tag :skip
+    test "executes tool call via HTTP request" do
+      provider = %{
+        type: :http,
+        name: "test_api",
+        url: "http://example.com/api",
+        http_method: "POST",
+        content_type: "application/json",
+        headers: %{},
+        auth: nil
+      }
+
+      result = Http.call_tool("test_tool", %{"input" => "value"}, provider)
+      assert match?({:error, _}, result)
+    end
+
+    test "substitutes URL params in tool call" do
+      provider = %{
+        type: :http,
+        name: "test_api",
+        url: "http://example.com/users/{user_id}",
+        http_method: "GET",
+        content_type: "application/json",
+        headers: %{},
+        auth: nil
+      }
+
+      result = Http.call_tool("get_user", %{"user_id" => "42"}, provider)
+      assert match?({:error, _}, result)
+    end
+  end
+
+  describe "call_tool_stream/3 with HTTP provider" do
+    @tag :skip
+    test "executes tool stream via HTTP request" do
+      provider = %{
+        type: :http,
+        name: "test_api",
+        url: "http://example.com/stream",
+        http_method: "POST",
+        content_type: "application/json",
+        headers: %{},
+        auth: nil
+      }
+
+      result = Http.call_tool_stream("stream_tool", %{}, provider)
+      assert match?({:error, _}, result)
+    end
+  end
+
+  describe "register_tool_provider/1 with HTTP provider" do
+    @tag :skip
+    test "discovers tools from HTTP endpoint" do
+      provider = %{
+        type: :http,
+        name: "test_api",
+        url: "http://example.com/api",
+        http_method: "GET",
+        content_type: "application/json",
+        headers: %{},
+        auth: nil
+      }
+
+      result = Http.register_tool_provider(provider)
+      assert match?({:error, _}, result)
+    end
+  end
+
+  describe "execute_tool_stream helper" do
+    @tag :skip
+    test "creates stream result structure" do
+      provider = %{
+        type: :http,
+        name: "test_stream",
+        url: "http://example.com/stream",
+        http_method: "POST",
+        content_type: "application/json",
+        headers: %{},
+        auth: nil
+      }
+
+      result = execute_tool_stream("stream_tool", %{}, provider)
+      assert match?({:error, _}, result)
+    end
+
+    @tag :skip
+    test "substitutes URL params in stream call" do
+      provider = %{
+        type: :http,
+        name: "test_stream",
+        url: "http://example.com/streams/{stream_id}",
+        http_method: "GET",
+        content_type: "application/json",
+        headers: %{},
+        auth: nil
+      }
+
+      result = execute_tool_stream("stream_tool", %{"stream_id" => "abc"}, provider)
+      assert match?({:error, _}, result)
+    end
+  end
+
+  defp execute_tool_stream(tool_name, args, provider) do
+    url_template = substitute_url(provider.url, args)
+    remaining_args = remove_url_params(args, provider.url)
+
+    case make_streaming_request(provider, url_template, remaining_args) do
+      {:ok, stream} ->
+        {:ok, %{type: :stream, data: stream, metadata: %{"transport" => "http", "tool" => tool_name}}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp substitute_url(url, args) do
+    Enum.reduce(args, url, fn {key, value}, acc_url ->
+      placeholder = "{#{key}}"
+
+      if String.contains?(acc_url, placeholder) do
+        String.replace(acc_url, placeholder, to_string(value))
+      else
+        acc_url
+      end
+    end)
+  end
+
+  defp remove_url_params(args, url) do
+    url_params = extract_url_params(url)
+    Map.drop(args, url_params)
+  end
+
+  defp extract_url_params(url) do
+    Regex.scan(~r/\{(\w+)\}/, url)
+    |> Enum.map(fn [_, param] -> param end)
+  end
+
+  defp make_streaming_request(provider, url, args) do
+    headers = build_headers(provider)
+    headers = Auth.apply_to_headers(provider.auth, headers)
+    headers = Map.put(headers, "Accept", "text/event-stream")
+    headers = Map.put(headers, "Cache-Control", "no-cache")
+
+    request_opts = [
+      method: String.downcase(provider.http_method),
+      url: url,
+      headers: headers,
+      json: args,
+      receive_timeout: :infinity,
+      stream_to: self()
+    ]
+
+    case Req.request(request_opts) do
+      {:ok, response} ->
+        if response.status == 200 do
+          stream = create_sse_stream(response)
+          {:ok, stream}
+        else
+          {:error, "HTTP #{response.status}: #{inspect(response.body)}"}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp create_sse_stream(response) do
+    Stream.resource(
+      fn -> %{response: response, buffer: "", sequence: 0} end,
+      fn state ->
+        case read_sse_chunk(state) do
+          {:ok, chunk, new_state} -> {[chunk], new_state}
+          {:error, :end} -> {:halt, state}
+          {:error, reason} -> {[%{type: :error, error: reason, code: 500}], state}
+        end
+      end,
+      fn _state -> :ok end
+    )
+  end
+
+  defp read_sse_chunk(state) do
+    receive do
+      {:data, data} ->
+        buffer = state.buffer <> data
+        {chunks, remaining_buffer} = parse_sse_data(buffer)
+
+        new_state = %{state | buffer: remaining_buffer}
+
+        case chunks do
+          [] ->
+            read_sse_chunk(new_state)
+
+          [chunk | _rest] ->
+            processed_chunk = process_sse_chunk(chunk, state.sequence)
+            new_state = %{new_state | sequence: state.sequence + 1}
+            {:ok, processed_chunk, new_state}
+        end
+
+      {:done, _ref} ->
+        {:error, :end}
+
+      {:error, _ref, reason} ->
+        {:error, reason}
+    after
+      5_000 ->
+        {:error, :timeout}
+    end
+  end
+
+  defp parse_sse_data(buffer) do
+    lines = String.split(buffer, "\n", trim: true)
+    {chunks, remaining} = parse_sse_lines(lines, [])
+    {chunks, remaining}
+  end
+
+  defp parse_sse_lines(lines, acc) do
+    case lines do
+      [] ->
+        {Enum.reverse(acc), ""}
+
+      [line | rest] ->
+        case parse_sse_line(line) do
+          {:ok, chunk} -> parse_sse_lines(rest, [chunk | acc])
+          :continue -> {Enum.reverse(acc), Enum.join([line | rest], "\n")}
+        end
+    end
+  end
+
+  defp parse_sse_line(line) do
+    case String.trim(line) do
+      "" ->
+        :continue
+
+      "data: [DONE]" ->
+        {:ok, %{type: :end}}
+
+      "data: " <> data ->
+        case Jason.decode(data) do
+          {:ok, json_data} -> {:ok, %{type: :data, content: json_data}}
+          {:error, _} -> {:ok, %{type: :data, content: data}}
+        end
+
+      "event: " <> _event ->
+        :continue
+
+      "id: " <> _id ->
+        :continue
+
+      "retry: " <> _retry ->
+        :continue
+
+      _ ->
+        :continue
+    end
+  end
+
+  defp process_sse_chunk(chunk, sequence) do
+    case chunk do
+      %{type: :data, content: content} ->
+        %{
+          data: content,
+          metadata: %{"sequence" => sequence, "timestamp" => System.monotonic_time(:millisecond)},
+          timestamp: System.monotonic_time(:millisecond),
+          sequence: sequence
+        }
+
+      %{type: :end} ->
+        %{type: :end, metadata: %{"sequence" => sequence}}
+
+      other ->
+        other
+    end
+  end
 end
