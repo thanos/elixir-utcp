@@ -60,5 +60,14 @@ jobs:
       - name: Audit dependencies for known vulnerabilities
         run: mix hex.audit
 
-      - name: Run full verification
-        run: mix verify
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Compile with warnings as errors
+        run: mix compile --warnings-as-errors
+
+      - name: Run Credo
+        run: mix credo --strict
+
+      - name: Check documentation
+        run: mix docs 2>&1 | tee docs_output.txt && ! grep -i "warning" docs_output.txt
