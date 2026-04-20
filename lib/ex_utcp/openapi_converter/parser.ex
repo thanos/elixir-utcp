@@ -16,7 +16,7 @@ defmodule ExUtcp.OpenApiConverter.Parser do
 
   `{:ok, parsed_spec}` on success, `{:error, reason}` on failure.
   """
-  @spec parse(map()) :: {:ok, T.ParsedSpec.t()} | {:error, term()}
+  @spec parse(map()) :: {:ok, ExUtcp.OpenApiConverter.Types.ParsedSpec.t()} | {:error, String.t()}
   def parse(spec) do
     case detect_version(spec) do
       "2.0" -> parse_swagger_2_0(spec)
@@ -36,7 +36,7 @@ defmodule ExUtcp.OpenApiConverter.Parser do
 
   `{:ok, validation_result}` on success, `{:error, reason}` on failure.
   """
-  @spec validate(map()) :: {:ok, T.ValidationResult.t()} | {:error, term()}
+  @spec validate(map()) :: {:ok, ExUtcp.OpenApiConverter.Types.ValidationResult.t()}
   def validate(spec) do
     case parse(spec) do
       {:ok, parsed_spec} ->

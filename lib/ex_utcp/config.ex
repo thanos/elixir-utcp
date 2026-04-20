@@ -14,7 +14,7 @@ defmodule ExUtcp.Config do
   def new(opts \\ []) do
     %{
       variables: Keyword.get(opts, :variables, %{}),
-      providers_file_path: Keyword.get(opts, :providers_file_path, nil),
+      providers_file_path: Keyword.get(opts, :providers_file_path),
       load_variables_from: Keyword.get(opts, :load_variables_from, [])
     }
   end

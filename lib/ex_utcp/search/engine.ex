@@ -14,14 +14,23 @@ defmodule ExUtcp.Search.Engine do
 
   @type t :: %__MODULE__{
           tools_index: %{String.t() => Types.tool()},
-          providers_index: %{String.t() => Types.provider_config()},
+          providers_index: %{String.t() => map()},
           config: map()
         }
 
   @doc """
   Creates a new search engine.
   """
-  @spec new(keyword()) :: t()
+  @spec new(keyword()) :: %__MODULE__{
+          tools_index: %{String.t() => Types.tool()},
+          providers_index: %{String.t() => map()},
+          config: %{
+            enable_caching: boolean(),
+            fuzzy_threshold: float(),
+            max_results: integer(),
+            semantic_threshold: float()
+          }
+        }
   def new(opts \\ []) do
     config = %{
       fuzzy_threshold: Keyword.get(opts, :fuzzy_threshold, 0.6),
@@ -63,7 +72,7 @@ defmodule ExUtcp.Search.Engine do
   @doc """
   Adds a provider to the search index.
   """
-  @spec add_provider(t() | pid(), Types.provider_config()) :: t() | :ok
+  @spec add_provider(t() | pid(), map()) :: t() | :ok
   def add_provider(engine_or_pid, provider)
 
   def add_provider(%__MODULE__{} = engine, provider) do
@@ -122,7 +131,7 @@ defmodule ExUtcp.Search.Engine do
   @doc """
   Gets all providers from the search index.
   """
-  @spec get_all_providers(t() | pid()) :: [Types.provider_config()]
+  @spec get_all_providers(t() | pid()) :: [map()]
   def get_all_providers(engine_or_pid)
 
   def get_all_providers(%__MODULE__{} = engine) do
@@ -150,7 +159,7 @@ defmodule ExUtcp.Search.Engine do
   @doc """
   Gets a provider by name.
   """
-  @spec get_provider(t() | pid(), String.t()) :: Types.provider_config() | nil
+  @spec get_provider(t() | pid(), String.t()) :: map() | nil
   def get_provider(engine_or_pid, provider_name)
 
   def get_provider(%__MODULE__{} = engine, provider_name) do

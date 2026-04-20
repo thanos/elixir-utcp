@@ -9,6 +9,8 @@ defmodule ExUtcp.Monitoring.Performance do
 
   alias ExUtcp.Monitoring.Metrics
 
+  require Logger
+
   @enforce_keys [:config, :start_time]
   defstruct [:config, :start_time, :metrics]
 
@@ -166,7 +168,13 @@ defmodule ExUtcp.Monitoring.Performance do
   @doc """
   Gets performance summary for all operations.
   """
-  @spec get_performance_summary() :: map()
+  @spec get_performance_summary() :: %{
+          operations: map(),
+          system: map(),
+          alerts: [map()],
+          timestamp: integer(),
+          status: atom()
+        }
   def get_performance_summary do
     metrics = Metrics.get_metrics()
 
@@ -190,7 +198,7 @@ defmodule ExUtcp.Monitoring.Performance do
   @doc """
   Checks for performance alerts based on thresholds.
   """
-  @spec get_performance_alerts(map()) :: [map()]
+  @spec get_performance_alerts(map() | nil) :: [map()]
   def get_performance_alerts(metrics \\ nil) do
     metrics = metrics || Metrics.get_metrics()
     alerts = []

@@ -30,6 +30,8 @@ defmodule ExUtcp.Types do
           format: String.t()
         }
 
+  @type provider_config :: map()
+
   @type tool :: %{
           name: String.t(),
           description: String.t(),
@@ -146,8 +148,11 @@ defmodule ExUtcp.Types do
   @type webrtc_provider :: %{
           name: String.t(),
           type: :webrtc,
-          url: String.t(),
-          auth: auth() | nil
+          peer_id: String.t() | nil,
+          signaling_server: String.t(),
+          ice_servers: [map()],
+          timeout: integer(),
+          tools: [map()]
         }
 
   @type mcp_provider :: %{

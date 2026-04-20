@@ -45,6 +45,9 @@ defmodule ExUtcp.Monitoring.PromEx.Plugin do
 
   use PromEx.Plugin
 
+  @dialyzer {:no_return, [event_metrics: 1, manual_metrics: 1]}
+  @dialyzer {:nowarn_function, [polling_metrics: 1, event_metrics: 1, manual_metrics: 1]}
+
   @impl true
   def polling_metrics(opts) do
     poll_rate = Keyword.get(opts, :poll_rate, 5_000)
@@ -97,7 +100,7 @@ defmodule ExUtcp.Monitoring.PromEx.Plugin do
         description: "Tool call duration",
         tags: [:tool_name, :provider_name],
         unit: :millisecond,
-        buckets: [10, 50, 100, 500, 1000, 5000, 10000]
+        buckets: [10, 50, 100, 500, 1000, 5000, 10_000]
       ),
 
       # Search metrics

@@ -3,8 +3,8 @@ defmodule ExUtcp.OpenApiConverter.Generator do
   Generates UTCP tools from parsed OpenAPI specifications.
   """
 
+  alias ExUtcp.OpenApiConverter.AuthMapper
   alias ExUtcp.OpenApiConverter.Types, as: T
-  alias ExUtcp.OpenApiConverter.{AuthMapper}
 
   @doc """
   Generates UTCP tools from a parsed OpenAPI specification.
@@ -18,7 +18,8 @@ defmodule ExUtcp.OpenApiConverter.Generator do
 
   `{:ok, tools}` on success, `{:error, reason}` on failure.
   """
-  @spec generate_tools(T.ParsedSpec.t(), keyword()) :: {:ok, [map()]} | {:error, term()}
+  @spec generate_tools(ExUtcp.OpenApiConverter.Types.ParsedSpec.t(), keyword()) ::
+          {:ok, [map()]} | {:error, String.t()}
   def generate_tools(parsed_spec, opts \\ []) do
     conversion_opts = build_conversion_options(opts)
 

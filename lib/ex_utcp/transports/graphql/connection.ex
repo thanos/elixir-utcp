@@ -207,11 +207,11 @@ defmodule ExUtcp.Transports.Graphql.Connection do
   end
 
   def handle_call(:get_last_used, _from, state) do
-    {:reply, state.last_used_at, state}
+    {:reply, state.last_used, state}
   end
 
   def handle_call(:update_last_used, _from, state) do
-    new_state = %{state | last_used_at: System.monotonic_time(:millisecond)}
+    new_state = %{state | last_used: System.monotonic_time(:millisecond)}
     {:reply, :ok, new_state}
   end
 
@@ -265,9 +265,7 @@ defmodule ExUtcp.Transports.Graphql.Connection do
         {:ok, new_state}
 
       {:ok, %{status: status, body: body}} ->
-        Logger.error(
-          "Failed to connect to GraphQL endpoint #{url}: HTTP #{status} - #{inspect(body)}"
-        )
+        Logger.error("Failed to connect to GraphQL endpoint #{url}: HTTP #{status} - #{inspect(body)}")
 
         {:error, "HTTP #{status}: #{inspect(body)}"}
 

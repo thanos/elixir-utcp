@@ -126,7 +126,27 @@ defmodule ExUtcp.Monitoring do
   @doc """
   Gets current system metrics.
   """
-  @spec get_metrics() :: map()
+  @spec get_metrics() :: %{
+          system: %{
+            memory: %{
+              atom: non_neg_integer(),
+              binary: non_neg_integer(),
+              ets: non_neg_integer(),
+              processes: non_neg_integer(),
+              system: non_neg_integer(),
+              total: non_neg_integer()
+            },
+            processes: %{count: non_neg_integer(), limit: non_neg_integer()},
+            schedulers: %{online: pos_integer(), total: pos_integer()}
+          },
+          timestamp: integer(),
+          utcp: %{
+            connections: %{active: 0, failed: 0, total: 0},
+            providers: %{by_transport: map(), total: 0},
+            searches: %{by_algorithm: map(), total: 0},
+            tool_calls: %{avg_duration: float(), error: 0, success: 0, total: 0}
+          }
+        }
   def get_metrics do
     %{
       system: get_system_metrics(),
@@ -138,7 +158,15 @@ defmodule ExUtcp.Monitoring do
   @doc """
   Gets health status for all components.
   """
-  @spec get_health_status() :: map()
+  @spec get_health_status() :: %{
+          overall: :healthy,
+          components: %{
+            prometheus: :healthy | :unhealthy,
+            telemetry: :healthy | :unhealthy,
+            transports: %{overall: :degraded | :healthy, transports: map()}
+          },
+          timestamp: integer()
+        }
   def get_health_status do
     %{
       overall: :healthy,

@@ -14,6 +14,8 @@ defmodule ExUtcp.Transports.WebSocket do
 
   require Logger
 
+  @dialyzer {:nowarn_function, establish_connection: 2, get_or_create_connection: 2, handle_call: 3}
+
   defstruct [
     :logger,
     :connection_timeout,
@@ -26,7 +28,14 @@ defmodule ExUtcp.Transports.WebSocket do
   @doc """
   Creates a new WebSocket transport.
   """
-  @spec new(keyword()) :: %__MODULE__{}
+  @spec new(keyword()) :: %__MODULE__{
+          connection_pool: map(),
+          connection_timeout: non_neg_integer(),
+          logger: function(),
+          max_retries: non_neg_integer(),
+          retry_config: map(),
+          retry_delay: non_neg_integer()
+        }
   def new(opts \\ []) do
     %__MODULE__{
       logger: Keyword.get(opts, :logger, &Logger.info/1),
@@ -261,7 +270,6 @@ defmodule ExUtcp.Transports.WebSocket do
     headers = build_headers(provider)
     headers = Auth.apply_to_headers(provider.auth, headers)
 
-    # Add WebSocket protocol if specified
     headers =
       if provider.protocol do
         Map.put(headers, "Sec-WebSocket-Protocol", provider.protocol)
@@ -269,8 +277,7 @@ defmodule ExUtcp.Transports.WebSocket do
         headers
       end
 
-    # Convert headers to the format expected by websockex
-    ws_headers = Enum.map(headers, fn {k, v} -> {String.to_atom(k), v} end)
+    ws_headers = Enum.map(headers, fn {k, v} -> {safe_string_to_atom(k), v} end)
 
     opts = [
       extra_headers: ws_headers,
@@ -281,7 +288,7 @@ defmodule ExUtcp.Transports.WebSocket do
 
     case Connection.start_link(provider.url, provider, opts) do
       {:ok, conn} -> {:ok, conn}
-      {:error, reason} -> {:error, "Failed to connect to WebSocket: #{inspect(reason)}"}
+      error -> error
     end
   end
 
@@ -486,5 +493,19 @@ defmodule ExUtcp.Transports.WebSocket do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  # Safe conversion to atom - only converts if atom already exists
+  # Falls back to string if atom doesn't exist to prevent atom table exhaustion
+  defp safe_string_to_atom(string) do
+    String.to_existing_atom(string)
+  rescue
+    ArgumentError ->
+      # Try lowercase version
+      try do
+        String.to_existing_atom(String.downcase(string))
+      rescue
+        ArgumentError -> string
+      end
   end
 end

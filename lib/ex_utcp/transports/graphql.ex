@@ -30,7 +30,14 @@ defmodule ExUtcp.Transports.Graphql do
   @doc """
   Creates a new GraphQL transport.
   """
-  @spec new(keyword()) :: %__MODULE__{}
+  @spec new(keyword()) :: %__MODULE__{
+          connection_timeout: non_neg_integer(),
+          logger: function(),
+          max_retries: non_neg_integer(),
+          pool_opts: keyword(),
+          retry_config: map(),
+          retry_delay: non_neg_integer()
+        }
   def new(opts \\ []) do
     %__MODULE__{
       logger: Keyword.get(opts, :logger, &Logger.info/1),
@@ -310,9 +317,7 @@ defmodule ExUtcp.Transports.Graphql do
             # Convert tool call to GraphQL query
             case build_graphql_operation(tool_name, args) do
               {:query, query_string, variables} ->
-                case Connection.query(conn, query_string, variables,
-                       timeout: state.connection_timeout
-                     ) do
+                case Connection.query(conn, query_string, variables, timeout: state.connection_timeout) do
                   {:ok, result} -> {:ok, result}
                   {:error, reason} -> {:error, "Failed to execute query: #{inspect(reason)}"}
                 end
@@ -334,9 +339,7 @@ defmodule ExUtcp.Transports.Graphql do
             # Convert tool stream to GraphQL subscription
             case build_graphql_subscription(tool_name, args) do
               {:subscription, subscription_string, variables} ->
-                case Connection.subscription(conn, subscription_string, variables,
-                       timeout: state.connection_timeout
-                     ) do
+                case Connection.subscription(conn, subscription_string, variables, timeout: state.connection_timeout) do
                   {:ok, results} ->
                     # Create a proper streaming result with enhanced metadata
                     stream = create_graphql_stream(results, tool_name, provider)

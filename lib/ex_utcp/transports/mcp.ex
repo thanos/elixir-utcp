@@ -9,7 +9,8 @@ defmodule ExUtcp.Transports.Mcp do
   use ExUtcp.Transports.Behaviour
   use GenServer
 
-  alias ExUtcp.Transports.Mcp.{Pool, Connection}
+  alias ExUtcp.Transports.Mcp.Connection
+  alias ExUtcp.Transports.Mcp.Pool
 
   require Logger
 
@@ -61,14 +62,14 @@ defmodule ExUtcp.Transports.Mcp do
   @doc """
   Returns whether this transport supports streaming.
   """
-  @spec supports_streaming?() :: boolean()
+  @spec supports_streaming?() :: true
   @impl true
   def supports_streaming?, do: true
 
   @doc """
   Registers a tool provider with the MCP transport.
   """
-  @spec register_tool_provider(ExUtcp.Types.mcp_provider()) :: :ok | {:error, String.t()}
+  @spec register_tool_provider(ExUtcp.Types.provider()) :: ExUtcp.Types.register_result()
   @impl true
   def register_tool_provider(provider) do
     case provider.type do
@@ -86,7 +87,7 @@ defmodule ExUtcp.Transports.Mcp do
   @doc """
   Deregisters a tool provider from the MCP transport.
   """
-  @spec deregister_tool_provider(ExUtcp.Types.mcp_provider()) :: :ok | {:error, String.t()}
+  @spec deregister_tool_provider(ExUtcp.Types.provider()) :: ExUtcp.Types.deregister_result()
   @impl true
   def deregister_tool_provider(provider) do
     case provider.type do
@@ -101,7 +102,7 @@ defmodule ExUtcp.Transports.Mcp do
   @doc """
   Calls a tool using the MCP transport.
   """
-  @spec call_tool(String.t(), map(), ExUtcp.Types.mcp_provider()) :: ExUtcp.Types.call_result()
+  @spec call_tool(String.t(), map(), ExUtcp.Types.provider()) :: ExUtcp.Types.call_result()
   @impl true
   def call_tool(tool_name, args, provider) do
     GenServer.call(__MODULE__, {:call_tool, tool_name, args, provider})
@@ -110,8 +111,7 @@ defmodule ExUtcp.Transports.Mcp do
   @doc """
   Calls a tool with streaming support using the MCP transport.
   """
-  @spec call_tool_stream(String.t(), map(), ExUtcp.Types.mcp_provider()) ::
-          ExUtcp.Types.call_result()
+  @spec call_tool_stream(String.t(), map(), ExUtcp.Types.provider()) :: ExUtcp.Types.stream_call_result()
   @impl true
   def call_tool_stream(tool_name, args, provider) do
     GenServer.call(__MODULE__, {:call_tool_stream, tool_name, args, provider})
@@ -241,9 +241,7 @@ defmodule ExUtcp.Transports.Mcp do
       fn ->
         case Pool.get_connection(provider) do
           {:ok, conn} ->
-            case Connection.call_tool_stream(conn, tool_name, args,
-                   timeout: state.connection_timeout
-                 ) do
+            case Connection.call_tool_stream(conn, tool_name, args, timeout: state.connection_timeout) do
               {:ok, stream} ->
                 # Enhance the stream with proper MCP streaming metadata
                 enhanced_stream = create_mcp_stream(stream, tool_name, provider)
@@ -334,9 +332,7 @@ defmodule ExUtcp.Transports.Mcp do
       fn ->
         case Pool.get_connection(provider) do
           {:ok, conn} ->
-            case Connection.send_notification(conn, method, params,
-                   timeout: state.connection_timeout
-                 ) do
+            case Connection.send_notification(conn, method, params, timeout: state.connection_timeout) do
               :ok -> :ok
               {:error, reason} -> {:error, "Failed to send notification: #{inspect(reason)}"}
             end

@@ -22,6 +22,9 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 ex_utcp-*.tar
 
+# Dialyzer PLTs
+/priv/plts/*.plt
+
 # Temporary files, for example, from tests.
 /tmp/
 

@@ -14,7 +14,9 @@ defmodule ExUtcp.Transports.Grpc do
   use ExUtcp.Transports.Behaviour
   use GenServer
 
-  alias ExUtcp.Transports.Grpc.{Pool, Connection, Gnmi}
+  alias ExUtcp.Transports.Grpc.Connection
+  alias ExUtcp.Transports.Grpc.Gnmi
+  alias ExUtcp.Transports.Grpc.Pool
 
   require Logger
 
@@ -30,7 +32,14 @@ defmodule ExUtcp.Transports.Grpc do
   @doc """
   Creates a new gRPC transport.
   """
-  @spec new(keyword()) :: %__MODULE__{}
+  @spec new(keyword()) :: %__MODULE__{
+          connection_timeout: non_neg_integer(),
+          logger: function(),
+          max_retries: non_neg_integer(),
+          pool_opts: keyword(),
+          retry_config: map(),
+          retry_delay: non_neg_integer()
+        }
   def new(opts \\ []) do
     %__MODULE__{
       logger: Keyword.get(opts, :logger, &Logger.info/1),
