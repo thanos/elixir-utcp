@@ -173,7 +173,7 @@ defmodule ExUtcp.Transports.WebRTC.SignalingTest do
       server_url = "wss://signaling.example.com"
       parent_pid = self()
 
-      {:ok, pid} = Signaling.start_link(server_url, parent_pid)
+      {:ok, _pid} = Signaling.start_link(server_url, parent_pid)
       Process.sleep(100)
 
       from = {self(), :test_ref}
@@ -260,7 +260,7 @@ defmodule ExUtcp.Transports.WebRTC.SignalingTest do
       result = Signaling.handle_info(:connect_to_signaling_server, state)
 
       # Should update state with peer_id and connected status
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.peer_id != nil
       assert new_state.connection_state == :connected
@@ -534,7 +534,7 @@ defmodule ExUtcp.Transports.WebRTC.SignalingTest do
 
       # Connection succeeds and generates peer_id
       result = Signaling.handle_info(:connect_to_signaling_server, state)
-      assert match?({:noreply, new_state}, result)
+      assert match?({:noreply, _new_state}, result)
       {:noreply, new_state} = result
       assert new_state.peer_id != nil
       assert new_state.connection_state == :connected

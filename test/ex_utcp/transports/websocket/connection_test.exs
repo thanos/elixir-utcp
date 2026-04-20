@@ -455,7 +455,7 @@ defmodule ExUtcp.Transports.WebSocket.ConnectionTest do
 
       result = Connection.handle_call(:get_all_messages, from, state)
       # Note: :queue.to_list returns FIFO order but elements are in reverse order
-      assert match?({:reply, messages, new_state}, result)
+      assert match?({:reply, _messages, _new_state}, result)
       {:reply, messages, new_state} = result
       # Both messages should be returned
       assert length(messages) == 2
@@ -478,7 +478,7 @@ defmodule ExUtcp.Transports.WebSocket.ConnectionTest do
       }
 
       result = Connection.handle_call(:clear_messages, from, state)
-      assert match?({:reply, :ok, new_state}, result)
+      assert match?({:reply, :ok, _new_state}, result)
       {:reply, :ok, new_state} = result
       assert :queue.is_empty(new_state.message_queue)
     end
@@ -548,7 +548,7 @@ defmodule ExUtcp.Transports.WebSocket.ConnectionTest do
       }
 
       result = Connection.handle_cast(:update_last_used, state)
-      assert match?({:ok, new_state}, result)
+      assert match?({:ok, _new_state}, result)
       {:ok, new_state} = result
       assert new_state.last_ping != nil
     end

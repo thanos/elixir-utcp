@@ -440,7 +440,7 @@ defmodule ExUtcp.Transports.GraphqlUnitTest do
     @tag :skip
     test "initializes with default opts" do
       result = Graphql.init([])
-      assert match?({:ok, state}, result)
+      assert match?({:ok, _state}, result)
       {:ok, state} = result
       assert %Graphql{} = state
       assert state.connection_timeout == 30_000
@@ -454,7 +454,7 @@ defmodule ExUtcp.Transports.GraphqlUnitTest do
     @tag :skip
     test "initializes with custom opts" do
       result = Graphql.init(connection_timeout: 60_000, max_retries: 5, retry_delay: 2000)
-      assert match?({:ok, state}, result)
+      assert match?({:ok, _state}, result)
       {:ok, state} = result
       assert state.connection_timeout == 60_000
       assert state.max_retries == 5
@@ -528,7 +528,9 @@ defmodule ExUtcp.Transports.GraphqlUnitTest do
       from = {self(), :test_ref}
       provider = %{type: :graphql, name: "test", url: "http://invalid:9999/graphql"}
 
-      result = Graphql.handle_call({:mutation, provider, "mutation { test }", %{}, []}, from, state)
+      result =
+        Graphql.handle_call({:mutation, provider, "mutation { test }", %{}, []}, from, state)
+
       assert match?({:reply, {:error, _}, ^state}, result)
     end
   end
@@ -540,7 +542,13 @@ defmodule ExUtcp.Transports.GraphqlUnitTest do
       from = {self(), :test_ref}
       provider = %{type: :graphql, name: "test", url: "http://invalid:9999/graphql"}
 
-      result = Graphql.handle_call({:subscription, provider, "subscription { test }", %{}, []}, from, state)
+      result =
+        Graphql.handle_call(
+          {:subscription, provider, "subscription { test }", %{}, []},
+          from,
+          state
+        )
+
       assert match?({:reply, {:error, _}, ^state}, result)
     end
   end
@@ -593,7 +601,9 @@ defmodule ExUtcp.Transports.GraphqlUnitTest do
 
   describe "build_graphql_subscription/2" do
     test "creates subscription with simple tool name" do
-      {type, subscription_string, variables} = build_graphql_subscription("updates", %{"filter" => "active"})
+      {type, subscription_string, variables} =
+        build_graphql_subscription("updates", %{"filter" => "active"})
+
       assert type == :subscription
       assert subscription_string =~ "subscription updates"
       assert subscription_string =~ "updates(input:"
@@ -601,7 +611,9 @@ defmodule ExUtcp.Transports.GraphqlUnitTest do
     end
 
     test "replaces dots in subscription name" do
-      {type, subscription_string, _variables} = build_graphql_subscription("stream.v2.updates", %{})
+      {type, subscription_string, _variables} =
+        build_graphql_subscription("stream.v2.updates", %{})
+
       assert type == :subscription
       assert subscription_string =~ "subscription stream_v2_updates"
     end

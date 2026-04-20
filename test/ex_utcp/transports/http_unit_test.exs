@@ -255,7 +255,7 @@ defmodule ExUtcp.Transports.HttpUnitTest do
 
     test "handles only whitespace lines" do
       buffer = "\n\n\n"
-      {chunks, remaining} = parse_sse_data(buffer)
+      {chunks, _remaining} = parse_sse_data(buffer)
 
       assert chunks == []
     end
@@ -930,28 +930,6 @@ defmodule ExUtcp.Transports.HttpUnitTest do
     end
   end
 
-  defp substitute_url(url, args) do
-    Enum.reduce(args, url, fn {key, value}, acc_url ->
-      placeholder = "{#{key}}"
-
-      if String.contains?(acc_url, placeholder) do
-        String.replace(acc_url, placeholder, to_string(value))
-      else
-        acc_url
-      end
-    end)
-  end
-
-  defp remove_url_params(args, url) do
-    url_params = extract_url_params(url)
-    Map.drop(args, url_params)
-  end
-
-  defp extract_url_params(url) do
-    Regex.scan(~r/\{(\w+)\}/, url)
-    |> Enum.map(fn [_, param] -> param end)
-  end
-
   defp make_streaming_request(provider, url, args) do
     headers = build_headers(provider)
     headers = Auth.apply_to_headers(provider.auth, headers)
@@ -1021,71 +999,6 @@ defmodule ExUtcp.Transports.HttpUnitTest do
     after
       5_000 ->
         {:error, :timeout}
-    end
-  end
-
-  defp parse_sse_data(buffer) do
-    lines = String.split(buffer, "\n", trim: true)
-    {chunks, remaining} = parse_sse_lines(lines, [])
-    {chunks, remaining}
-  end
-
-  defp parse_sse_lines(lines, acc) do
-    case lines do
-      [] ->
-        {Enum.reverse(acc), ""}
-
-      [line | rest] ->
-        case parse_sse_line(line) do
-          {:ok, chunk} -> parse_sse_lines(rest, [chunk | acc])
-          :continue -> {Enum.reverse(acc), Enum.join([line | rest], "\n")}
-        end
-    end
-  end
-
-  defp parse_sse_line(line) do
-    case String.trim(line) do
-      "" ->
-        :continue
-
-      "data: [DONE]" ->
-        {:ok, %{type: :end}}
-
-      "data: " <> data ->
-        case Jason.decode(data) do
-          {:ok, json_data} -> {:ok, %{type: :data, content: json_data}}
-          {:error, _} -> {:ok, %{type: :data, content: data}}
-        end
-
-      "event: " <> _event ->
-        :continue
-
-      "id: " <> _id ->
-        :continue
-
-      "retry: " <> _retry ->
-        :continue
-
-      _ ->
-        :continue
-    end
-  end
-
-  defp process_sse_chunk(chunk, sequence) do
-    case chunk do
-      %{type: :data, content: content} ->
-        %{
-          data: content,
-          metadata: %{"sequence" => sequence, "timestamp" => System.monotonic_time(:millisecond)},
-          timestamp: System.monotonic_time(:millisecond),
-          sequence: sequence
-        }
-
-      %{type: :end} ->
-        %{type: :end, metadata: %{"sequence" => sequence}}
-
-      other ->
-        other
     end
   end
 end
