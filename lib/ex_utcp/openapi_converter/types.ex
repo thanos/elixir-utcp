@@ -410,6 +410,16 @@ defmodule ExUtcp.OpenApiConverter.Types do
 
   defmodule ParsedSpec do
     @moduledoc "Parsed OpenAPI specification"
+    @type t :: %__MODULE__{
+            version: String.t() | nil,
+            info: map() | nil,
+            servers: [map()] | nil,
+            paths: [map()],
+            components: map() | nil,
+            security: [map()] | nil,
+            tags: [map()] | nil,
+            external_docs: map() | nil
+          }
     defstruct [
       :version,
       :info,
@@ -503,6 +513,15 @@ defmodule ExUtcp.OpenApiConverter.Types do
 
   defmodule ParsedSecurityScheme do
     @moduledoc "Parsed security scheme information"
+    @type t :: %__MODULE__{
+            name: String.t() | nil,
+            type: String.t() | nil,
+            description: String.t() | nil,
+            in: String.t() | nil,
+            scheme: String.t() | nil,
+            bearer_format: String.t() | nil,
+            flows: map() | nil
+          }
     defstruct [
       :name,
       :type,
@@ -534,6 +553,14 @@ defmodule ExUtcp.OpenApiConverter.Types do
 
   defmodule ValidationResult do
     @moduledoc "OpenAPI validation result"
+    @type t :: %__MODULE__{
+            valid: boolean(),
+            errors: [map()],
+            warnings: [map()],
+            version: String.t() | nil,
+            operations_count: non_neg_integer(),
+            security_schemes_count: non_neg_integer()
+          }
     defstruct [
       :valid,
       :errors,

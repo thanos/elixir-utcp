@@ -177,7 +177,7 @@ defmodule ExUtcp.OpenApiConverter do
 
   `{:ok, validation_result}` on success, `{:error, reason}` on failure.
   """
-  @spec validate(map()) :: {:ok, map()} | {:error, term()}
+  @spec validate(map()) :: {:ok, ExUtcp.OpenApiConverter.Types.ValidationResult.t()}
   def validate(spec) do
     Parser.validate(spec)
   end

@@ -19,9 +19,9 @@ defmodule ExUtcp.Providers do
       http_method: Keyword.get(opts, :http_method, "GET"),
       url: Keyword.fetch!(opts, :url),
       content_type: Keyword.get(opts, :content_type, "application/json"),
-      auth: Keyword.get(opts, :auth, nil),
+      auth: Keyword.get(opts, :auth),
       headers: Keyword.get(opts, :headers, %{}),
-      body_field: Keyword.get(opts, :body_field, nil),
+      body_field: Keyword.get(opts, :body_field),
       header_fields: Keyword.get(opts, :header_fields, [])
     }
   end
@@ -35,7 +35,7 @@ defmodule ExUtcp.Providers do
       name: Keyword.fetch!(opts, :name),
       type: :cli,
       command_name: Keyword.fetch!(opts, :command_name),
-      working_dir: Keyword.get(opts, :working_dir, nil),
+      working_dir: Keyword.get(opts, :working_dir),
       env_vars: Keyword.get(opts, :env_vars, %{})
     }
   end
@@ -49,9 +49,9 @@ defmodule ExUtcp.Providers do
       name: Keyword.fetch!(opts, :name),
       type: :websocket,
       url: Keyword.fetch!(opts, :url),
-      protocol: Keyword.get(opts, :protocol, nil),
+      protocol: Keyword.get(opts, :protocol),
       keep_alive: Keyword.get(opts, :keep_alive, false),
-      auth: Keyword.get(opts, :auth, nil),
+      auth: Keyword.get(opts, :auth),
       headers: Keyword.get(opts, :headers, %{}),
       header_fields: Keyword.get(opts, :header_fields, [])
     }
@@ -69,9 +69,9 @@ defmodule ExUtcp.Providers do
       port: Keyword.get(opts, :port, 9339),
       service_name: Keyword.get(opts, :service_name, "UTCPService"),
       method_name: Keyword.get(opts, :method_name, "CallTool"),
-      target: Keyword.get(opts, :target, nil),
+      target: Keyword.get(opts, :target),
       use_ssl: Keyword.get(opts, :use_ssl, false),
-      auth: Keyword.get(opts, :auth, nil)
+      auth: Keyword.get(opts, :auth)
     }
   end
 
@@ -84,7 +84,7 @@ defmodule ExUtcp.Providers do
       name: Keyword.fetch!(opts, :name),
       type: :graphql,
       url: Keyword.fetch!(opts, :url),
-      auth: Keyword.get(opts, :auth, nil),
+      auth: Keyword.get(opts, :auth),
       headers: Keyword.get(opts, :headers, %{})
     }
   end
@@ -92,7 +92,15 @@ defmodule ExUtcp.Providers do
   @doc """
   Creates a new WebRTC provider.
   """
-  @spec new_webrtc_provider(keyword()) :: T.webrtc_provider()
+  @spec new_webrtc_provider(keyword()) :: %{
+          ice_servers: [map()],
+          name: String.t(),
+          peer_id: String.t() | nil,
+          signaling_server: String.t(),
+          timeout: integer(),
+          tools: [map()],
+          type: :webrtc
+        }
   def new_webrtc_provider(opts) do
     %{
       name: Keyword.fetch!(opts, :name),
@@ -117,7 +125,7 @@ defmodule ExUtcp.Providers do
       name: Keyword.fetch!(opts, :name),
       type: :mcp,
       url: Keyword.fetch!(opts, :url),
-      auth: Keyword.get(opts, :auth, nil)
+      auth: Keyword.get(opts, :auth)
     }
   end
 
@@ -133,7 +141,7 @@ defmodule ExUtcp.Providers do
       host: Keyword.fetch!(opts, :host),
       port: Keyword.fetch!(opts, :port),
       timeout: Keyword.get(opts, :timeout, 5000),
-      auth: Keyword.get(opts, :auth, nil)
+      auth: Keyword.get(opts, :auth)
     }
   end
 
@@ -149,7 +157,7 @@ defmodule ExUtcp.Providers do
       host: Keyword.fetch!(opts, :host),
       port: Keyword.fetch!(opts, :port),
       timeout: Keyword.get(opts, :timeout, 5000),
-      auth: Keyword.get(opts, :auth, nil)
+      auth: Keyword.get(opts, :auth)
     }
   end
 
@@ -174,7 +182,7 @@ defmodule ExUtcp.Providers do
       name: Keyword.fetch!(opts, :name),
       type: :sse,
       url: Keyword.fetch!(opts, :url),
-      auth: Keyword.get(opts, :auth, nil),
+      auth: Keyword.get(opts, :auth),
       headers: Keyword.get(opts, :headers, %{})
     }
   end
@@ -188,7 +196,7 @@ defmodule ExUtcp.Providers do
       name: Keyword.fetch!(opts, :name),
       type: :http_stream,
       url: Keyword.fetch!(opts, :url),
-      auth: Keyword.get(opts, :auth, nil),
+      auth: Keyword.get(opts, :auth),
       headers: Keyword.get(opts, :headers, %{})
     }
   end

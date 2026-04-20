@@ -151,7 +151,7 @@ defmodule ExUtcp.SearchTest do
     test "fuzzy search finds approximate matches", %{engine: engine} do
       results = Search.search_tools(engine, "get_usr", %{algorithm: :fuzzy, threshold: 0.5})
 
-      assert length(results) >= 1
+      assert results != []
 
       # Should find "get_user" with high similarity
       get_user_result = Enum.find(results, &(&1.tool.name == "get_user"))
@@ -171,12 +171,12 @@ defmodule ExUtcp.SearchTest do
         })
 
       # At least one result
-      assert length(results) >= 1
+      assert results != []
 
       # Should find user-related tools
       user_tools = Enum.filter(results, &String.contains?(&1.tool.name, "user"))
       # At least one user tool
-      assert length(user_tools) >= 1
+      assert user_tools != []
     end
 
     test "combined search provides comprehensive results", %{engine: engine} do
@@ -230,7 +230,7 @@ defmodule ExUtcp.SearchTest do
           security_scan: true
         })
 
-      assert length(results) >= 1
+      assert results != []
 
       # Check that security warnings are included
       api_result = Enum.find(results, &(&1.tool.name == "api_tool"))
@@ -323,7 +323,7 @@ defmodule ExUtcp.SearchTest do
     test "searches providers by type", %{engine: engine} do
       results = Search.search_providers(engine, "http", %{algorithm: :fuzzy, threshold: 0.5})
 
-      assert length(results) >= 1
+      assert results != []
 
       # Should find HTTP provider
       http_result = Enum.find(results, &(&1.provider.type == :http))

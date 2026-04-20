@@ -21,3 +21,7 @@ Mox.defmock(ExUtcp.Transports.WebSocket.ConnectionMock,
 
 Mox.defmock(ExUtcp.Transports.Mcp.ConnectionMock, for: ExUtcp.Transports.Mcp.ConnectionBehaviour)
 Mox.defmock(ExUtcp.Transports.Mcp.PoolMock, for: ExUtcp.Transports.Mcp.PoolBehaviour)
+
+Mox.defmock(ExUtcp.Transports.WebRTC.ConnectionMock,
+  for: ExUtcp.Transports.WebRTC.ConnectionBehaviour
+)

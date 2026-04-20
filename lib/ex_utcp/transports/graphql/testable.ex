@@ -27,7 +27,16 @@ defmodule ExUtcp.Transports.Graphql.Testable do
   @doc """
   Creates a new testable GraphQL transport.
   """
-  @spec new(keyword()) :: %__MODULE__{}
+  @spec new(keyword()) :: %__MODULE__{
+          connection_module: module(),
+          connection_timeout: non_neg_integer(),
+          genserver_module: module(),
+          logger: function(),
+          max_retries: non_neg_integer(),
+          pool_opts: keyword(),
+          retry_config: map(),
+          retry_delay: non_neg_integer()
+        }
   def new(opts \\ []) do
     %__MODULE__{
       logger: Keyword.get(opts, :logger, &Logger.info/1),

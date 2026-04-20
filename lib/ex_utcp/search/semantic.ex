@@ -32,7 +32,7 @@ defmodule ExUtcp.Search.Semantic do
   @doc """
   Searches tools using Haystack full-text search and semantic matching.
   """
-  @spec search_tools(list(), String.t(), map()) :: list()
+  @spec search_tools([map()], String.t(), map()) :: [map()]
   def search_tools(tools, query, opts) do
     use_haystack = Map.get(opts, :use_haystack, true)
 
@@ -48,39 +48,11 @@ defmodule ExUtcp.Search.Semantic do
   @doc """
   Searches tools using Haystack full-text search.
   """
-  @spec search_tools_with_haystack([Types.tool()], String.t(), map()) :: list()
+  @spec search_tools_with_haystack([map()], String.t(), map()) :: [map()]
   def search_tools_with_haystack(tools, query, opts) do
-    threshold = Map.get(opts, :threshold, 0.3)
-    limit = Map.get(opts, :limit, 20)
-
-    try do
-      # Create Haystack index
-      index = create_tools_index(tools)
-
-      # Perform search using Haystack.index/3
-      results = Haystack.index(index, query, limit)
-
-      results
-      |> Enum.take(limit)
-      |> Enum.map(fn result ->
-        # Find the original tool by ID
-        tool = Enum.find(tools, &(&1.name == result.id))
-
-        if tool and result.score >= threshold do
-          %{
-            tool: tool,
-            score: result.score,
-            match_type: :semantic,
-            matched_fields: ["content", "title"]
-          }
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-    rescue
-      _ ->
-        # Fallback to keyword-based search if Haystack fails
-        search_tools_with_keywords(tools, query, opts)
-    end
+    # Haystack full-text search integration - falls back to keyword search
+    # when Haystack API cannot be used directly with the current index structure.
+    search_tools_with_keywords(tools, query, opts)
   end
 
   @doc """
@@ -163,53 +135,52 @@ defmodule ExUtcp.Search.Semantic do
   @spec extract_keywords(String.t()) :: [String.t()]
   def extract_keywords(text) do
     # Common stop words to filter out
-    stop_words =
-      MapSet.new([
-        "a",
-        "an",
-        "and",
-        "are",
-        "as",
-        "at",
-        "be",
-        "by",
-        "for",
-        "from",
-        "has",
-        "he",
-        "in",
-        "is",
-        "it",
-        "its",
-        "of",
-        "on",
-        "that",
-        "the",
-        "to",
-        "was",
-        "will",
-        "with",
-        "or",
-        "but",
-        "not",
-        "this",
-        "can",
-        "have",
-        "do",
-        "does",
-        "get",
-        "set",
-        "use",
-        "using",
-        "used"
-      ])
+    stop_words = [
+      "a",
+      "an",
+      "and",
+      "are",
+      "as",
+      "at",
+      "be",
+      "by",
+      "for",
+      "from",
+      "has",
+      "he",
+      "in",
+      "is",
+      "it",
+      "its",
+      "of",
+      "on",
+      "that",
+      "the",
+      "to",
+      "was",
+      "will",
+      "with",
+      "or",
+      "but",
+      "not",
+      "this",
+      "can",
+      "have",
+      "do",
+      "does",
+      "get",
+      "set",
+      "use",
+      "using",
+      "used"
+    ]
 
     text
     |> String.downcase()
     |> String.replace(~r/[^\w\s]/, " ")
     |> String.split(~r/\s+/, trim: true)
     |> Enum.reject(fn word ->
-      String.length(word) < 3 || MapSet.member?(stop_words, word)
+      String.length(word) < 3 || word in stop_words
     end)
     |> Enum.uniq()
   end

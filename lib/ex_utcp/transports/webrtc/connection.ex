@@ -9,8 +9,11 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   - Tool call communication over data channels
   """
 
+  @behaviour ExUtcp.Transports.WebRTC.ConnectionBehaviour
+
   use GenServer
 
+  alias ExUtcp.Transports.WebRTC.ConnectionBehaviour
   alias ExUtcp.Transports.WebRTC.Signaling
   alias ExWebRTC.PeerConnection
 
@@ -46,6 +49,7 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   @doc """
   Starts a new WebRTC connection.
   """
+  @impl ConnectionBehaviour
   @spec start_link(map(), String.t(), [map()]) :: {:ok, pid()} | {:error, term()}
   def start_link(provider, signaling_server, ice_servers) do
     GenServer.start_link(__MODULE__, {provider, signaling_server, ice_servers})
@@ -54,6 +58,7 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   @doc """
   Calls a tool over the WebRTC data channel.
   """
+  @impl ConnectionBehaviour
   @spec call_tool(pid(), String.t(), map(), integer()) :: {:ok, map()} | {:error, term()}
   def call_tool(pid, tool_name, args, timeout \\ 30_000) do
     GenServer.call(pid, {:call_tool, tool_name, args}, timeout)
@@ -62,8 +67,9 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   @doc """
   Calls a tool stream over the WebRTC data channel.
   """
+  @impl ConnectionBehaviour
   @spec call_tool_stream(pid(), String.t(), map(), integer()) ::
-          {:ok, Stream.t()} | {:error, term()}
+          {:ok, Enumerable.t()} | {:error, term()}
   def call_tool_stream(pid, tool_name, args, timeout \\ 30_000) do
     GenServer.call(pid, {:call_tool_stream, tool_name, args}, timeout)
   end
@@ -71,6 +77,7 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   @doc """
   Closes the WebRTC connection.
   """
+  @impl ConnectionBehaviour
   @spec close(pid()) :: :ok
   def close(pid) do
     GenServer.stop(pid)
@@ -79,6 +86,7 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   @doc """
   Gets the connection state.
   """
+  @impl ConnectionBehaviour
   @spec get_connection_state(pid()) :: atom()
   def get_connection_state(pid) do
     GenServer.call(pid, :get_connection_state)
@@ -87,6 +95,7 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
   @doc """
   Gets the ICE connection state.
   """
+  @impl ConnectionBehaviour
   @spec get_ice_connection_state(pid()) :: atom()
   def get_ice_connection_state(pid) do
     GenServer.call(pid, :get_ice_connection_state)
@@ -186,10 +195,10 @@ defmodule ExUtcp.Transports.WebRTC.Connection do
 
       # Create data channel
       {:ok, dc} =
-        PeerConnection.create_data_channel(pc, "utcp_channel", %{
+        PeerConnection.create_data_channel(pc, "utcp_channel",
           ordered: true,
           max_retransmits: 3
-        })
+        )
 
       # Connect to signaling server
       {:ok, signaling_pid} = Signaling.start_link(state.signaling_server, self())

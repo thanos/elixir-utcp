@@ -13,7 +13,6 @@ defmodule ExUtcp.Search.SecurityTest do
 
       assert is_list(warnings)
       # May have warnings if TruffleHog detects the API key pattern
-      assert length(warnings) >= 0
     end
 
     test "scans tool with password in description" do
@@ -79,7 +78,6 @@ defmodule ExUtcp.Search.SecurityTest do
 
       assert is_list(warnings)
       # May detect API key in URL
-      assert length(warnings) >= 0
     end
 
     test "scans provider with sensitive headers" do
@@ -94,7 +92,6 @@ defmodule ExUtcp.Search.SecurityTest do
 
       assert is_list(warnings)
       # May detect token in headers
-      assert length(warnings) >= 0
     end
 
     test "scans provider with authentication" do
@@ -113,7 +110,6 @@ defmodule ExUtcp.Search.SecurityTest do
 
       assert is_list(warnings)
       # Should detect API key in auth
-      assert length(warnings) >= 0
     end
 
     test "scans clean provider returns no warnings" do
@@ -226,7 +222,6 @@ defmodule ExUtcp.Search.SecurityTest do
 
       assert is_list(results)
       # Should return results or fallback gracefully
-      assert length(results) >= 0
     end
 
     test "searches tools with keyword fallback" do
@@ -243,7 +238,7 @@ defmodule ExUtcp.Search.SecurityTest do
         })
 
       assert is_list(results)
-      assert length(results) >= 1
+      assert results != []
 
       # Should find user-related tools
       user_tools =
@@ -251,7 +246,7 @@ defmodule ExUtcp.Search.SecurityTest do
           String.contains?(result.tool.definition.description, "user")
         end)
 
-      assert length(user_tools) >= 1
+      assert user_tools != []
     end
   end
 

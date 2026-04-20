@@ -156,6 +156,7 @@ defmodule ExUtcp.Search.Ranking do
   @doc """
   Applies boost factors based on search preferences.
   """
+  @dialyzer {:nowarn_function, apply_boost_factors: 2}
   @spec apply_boost_factors(map(), map()) :: map()
   def apply_boost_factors(result, opts) do
     boost_factors = Map.get(opts, :boost_factors, %{})

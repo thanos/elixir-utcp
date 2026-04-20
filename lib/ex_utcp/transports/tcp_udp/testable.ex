@@ -141,7 +141,7 @@ defmodule ExUtcp.Transports.TcpUdp.Testable do
       host: Keyword.get(opts, :host, "localhost"),
       port: Keyword.get(opts, :port, 8080),
       timeout: Keyword.get(opts, :timeout, 5000),
-      auth: Keyword.get(opts, :auth, nil)
+      auth: Keyword.get(opts, :auth)
     }
   end
 
@@ -156,7 +156,7 @@ defmodule ExUtcp.Transports.TcpUdp.Testable do
       host: Keyword.get(opts, :host, "localhost"),
       port: Keyword.get(opts, :port, 8080),
       timeout: Keyword.get(opts, :timeout, 5000),
-      auth: Keyword.get(opts, :auth, nil)
+      auth: Keyword.get(opts, :auth)
     }
   end
 

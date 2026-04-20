@@ -317,15 +317,14 @@ defmodule ExUtcp.Client do
   @impl GenServer
   def handle_call({:find_similar_tools, tool_name, opts}, _from, state) do
     case Repository.get_tool(state.repository, tool_name) do
-      {:ok, tool} ->
-        # Create search engine from current repository state
+      nil ->
+        {:reply, {:error, "Tool not found: #{tool_name}"}, state}
+
+      tool ->
         search_engine = create_search_engine_from_state(state)
 
         similar_tools = ExUtcp.Search.suggest_similar_tools(search_engine, tool, opts)
         {:reply, similar_tools, state}
-
-      {:error, reason} ->
-        {:reply, {:error, reason}, state}
     end
   end
 
@@ -511,12 +510,31 @@ defmodule ExUtcp.Client do
 
   defp parse_auth(nil), do: nil
 
-  defp parse_auth(auth_data) do
+  defp parse_auth(auth_data) when is_map(auth_data) do
     case Map.get(auth_data, "type") || Map.get(auth_data, "auth_type") do
-      "api_key" -> ExUtcp.Auth.new_api_key_auth(auth_data)
-      "basic" -> ExUtcp.Auth.new_basic_auth(auth_data)
-      "oauth2" -> ExUtcp.Auth.new_oauth2_auth(auth_data)
-      _ -> nil
+      "api_key" ->
+        ExUtcp.Auth.new_api_key_auth(
+          api_key: Map.get(auth_data, "api_key", ""),
+          location: Map.get(auth_data, "location", "header"),
+          var_name: Map.get(auth_data, "var_name", "Authorization")
+        )
+
+      "basic" ->
+        ExUtcp.Auth.new_basic_auth(
+          username: Map.get(auth_data, "username", ""),
+          password: Map.get(auth_data, "password", "")
+        )
+
+      "oauth2" ->
+        ExUtcp.Auth.new_oauth2_auth(
+          client_id: Map.get(auth_data, "client_id", ""),
+          client_secret: Map.get(auth_data, "client_secret", ""),
+          token_url: Map.get(auth_data, "token_url", ""),
+          scope: Map.get(auth_data, "scope", "")
+        )
+
+      _ ->
+        nil
     end
   end
 

@@ -20,8 +20,8 @@ defmodule ExUtcp.Tools do
       title: Keyword.get(opts, :title, ""),
       items: Keyword.get(opts, :items, %{}),
       enum: Keyword.get(opts, :enum, []),
-      minimum: Keyword.get(opts, :minimum, nil),
-      maximum: Keyword.get(opts, :maximum, nil),
+      minimum: Keyword.get(opts, :minimum),
+      maximum: Keyword.get(opts, :maximum),
       format: Keyword.get(opts, :format, "")
     }
   end
@@ -37,7 +37,7 @@ defmodule ExUtcp.Tools do
       inputs: Keyword.get(opts, :inputs, new_schema()),
       outputs: Keyword.get(opts, :outputs, new_schema()),
       tags: Keyword.get(opts, :tags, []),
-      average_response_size: Keyword.get(opts, :average_response_size, nil),
+      average_response_size: Keyword.get(opts, :average_response_size),
       provider: Keyword.fetch!(opts, :provider)
     }
   end

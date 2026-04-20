@@ -93,7 +93,7 @@ defmodule ExUtcp.Search.SemanticTest do
         })
 
       assert is_list(results)
-      assert length(results) >= 1
+      assert results != []
 
       # Should find user-related tools
       user_tools =
@@ -101,7 +101,7 @@ defmodule ExUtcp.Search.SemanticTest do
           String.contains?(result.tool.definition.description, "user")
         end)
 
-      assert length(user_tools) >= 1
+      assert user_tools != []
     end
 
     test "searches tools with Haystack integration" do
@@ -121,7 +121,6 @@ defmodule ExUtcp.Search.SemanticTest do
       assert is_list(results)
       # Should find at least one relevant tool
       # May be 0 if Haystack integration fails
-      assert length(results) >= 0
     end
 
     test "creates tools index for Haystack" do
@@ -151,7 +150,7 @@ defmodule ExUtcp.Search.SemanticTest do
       similar_tools = Semantic.find_similar_tools(reference_tool, candidate_tools, 0.2)
 
       assert is_list(similar_tools)
-      assert length(similar_tools) >= 1
+      assert similar_tools != []
 
       # Should find user-related tools
       user_tools =
@@ -159,7 +158,7 @@ defmodule ExUtcp.Search.SemanticTest do
           String.contains?(result.tool.definition.description, "user")
         end)
 
-      assert length(user_tools) >= 1
+      assert user_tools != []
     end
 
     test "excludes reference tool from similar tools" do
