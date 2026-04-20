@@ -1,4 +1,35 @@
 
+## Release Notes - ExUtcp v0.3.2
+
+### Overview
+ExUtcp v0.3.2 is a quality and testing release focused on improving test coverage, fixing bugs, hardening CI security, and correcting documentation. Test coverage increased from 52.0% to 55.5%, and multiple bugs were identified and fixed during testing.
+
+### Changes from v0.3.1
+
+#### Added
+- 71 unit tests for the Client module covering GenServer callbacks, provider/auth parsing, file validation, search, OpenAPI conversion, and monitoring.
+- 23 new tests for the GraphQL transport covering GenServer callbacks and state management.
+- Extended HTTP transport tests with SSE streaming, discovery parsing, header building, and schema parsing.
+- 34 tests for GraphQL Connection module: struct definition, public API, GenServer callbacks, and terminate handling.
+- 37 tests for TCP/UDP Pool and 29 tests for MCP Pool covering connection management and cleanup.
+- 25 additional MCP Connection tests covering callbacks and retry logic.
+- WebRTC ConnectionBehaviour module and Testable module with Mox support.
+- CI workflows with pinned GitHub Action commit SHAs for supply-chain security.
+
+#### Changed
+- Test coverage increased from 52.0% to 55.5%.
+- Integration tests now excluded by default (`ExUnit.start(exclude: [:integration])`).
+- All emoji removed from documentation, replaced with plain text equivalents.
+- 1473 total tests (0 failures, 133 excluded, 81 skipped).
+
+#### Fixed
+- GraphQL Connection: `handle_call(:get_last_used)` and `handle_call(:update_last_used)` referenced non-existent field `last_used_at` instead of `last_used`.
+- WebRTC provider type spec: removed `url` and `auth` keys that were required by the type but never created in actual provider maps.
+- GitHub Actions: pinned all actions to full commit SHAs (`actions/checkout@11bd7190`, `erlef/setup-beam@a6e26b22`, `actions/cache@5a3ec84e`).
+- Documentation: corrected test counts, Sobelow findings count, warnings count, and Python comment syntax.
+
+---
+
 ## Release Notes - ExUtcp v0.3.1
 
 ### Overview

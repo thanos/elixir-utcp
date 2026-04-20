@@ -34,7 +34,7 @@ Key characteristics:
 * Test configuration with integration test exclusion by default
 * Advanced Search: Multiple algorithms with fuzzy matching and semantic search
 * Monitoring and Metrics: Telemetry, PromEx, health checks, and performance monitoring
-* Comprehensive test suite with 497+ tests
+* Comprehensive test suite with 1473+ tests
 
 ## Installation
 
@@ -43,7 +43,7 @@ Add `ex_utcp` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_utcp, "~> 0.2.0"}
+    {:ex_utcp, "~> 0.3.2"}
   ]
 end
 ```

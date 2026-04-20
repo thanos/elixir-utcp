@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-04-19
+
+### Added
+- Comprehensive unit tests for Client module: 71 tests covering GenServer callbacks, provider parsing, auth parsing, file validation, search, OpenAPI conversion, and monitoring endpoints
+- Comprehensive unit tests for GraphQL transport: 23 new tests covering GenServer callbacks (init, handle_call, handle_info, terminate), state transitions, and type specifications
+- Comprehensive unit tests for HTTP transport: SSE streaming helpers, URL parameter substitution, discovery response parsing, tool response parsing, header building, and schema parsing
+- Unit tests for GraphQL Connection module: 34 tests covering struct definition, public API, GenServer callbacks, state transitions, and terminate handling
+- Unit tests for TCP/UDP Pool: 37 tests covering connection management, cleanup, and lifecycle
+- Unit tests for MCP Pool: 29 tests covering connection tracking, cleanup, and provider management
+- Extended MCP Connection tests: 25 additional tests covering GenServer callbacks and retry logic
+- CI workflows with pinned GitHub Action commit SHAs for supply-chain security
+- Behaviour module for WebRTC connection (ExUtcp.Transports.WebRTC.ConnectionBehaviour)
+- Testable module for WebRTC with Mox support
+
+### Changed
+- Test coverage increased from 52.0% to 55.5% across the codebase
+- GraphQL Connection: fixed bug where `handle_call(:get_last_used)` and `handle_call(:update_last_used)` referenced `last_used_at` instead of the struct field `last_used`
+- WebRTC provider type spec: removed `url` and `auth` keys that were never present in actual provider maps created by `Providers.new_webrtc_provider/1`
+- GitHub Actions: pinned `actions/checkout` to v4.2.2, `erlef/setup-beam` to v1.18.0, and `actions/cache` to v4.2.3 using full commit SHAs
+- Test suite now excludes integration tests by default via `ExUnit.start(exclude: [:integration])`
+- Removed all emoji from documentation files, replaced with plain text equivalents
+
+### Fixed
+- GraphQL Connection: `handle_call(:get_last_used)` and `handle_call(:update_last_used)` used wrong field name (`last_used_at` vs `last_used`)
+- WebRTC provider type spec: `url` and `auth` keys marked as required but never created in actual provider maps
+- Documentation inconsistencies in TEST_COVERAGE_REPORT.md: corrected test counts for sse_mock_test (19->22) and testable_validation_test (22->30)
+- Documentation inconsistency in ZERO_WARNINGS_ACHIEVED.md: Sobelow findings listed as "0" but should be "6 (all mitigated)"
+- Documentation inconsistency in WARNINGS_FIXED.md: remaining warnings count said "3" but actual count is "2"
+- Documentation error in COMPARISON_STUDY.md: Python comment syntax (`//`) used in Python example block instead of `#`
+
 ## [0.3.1] - 2025-10-05
 
 ### Added
